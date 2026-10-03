@@ -16,7 +16,7 @@ Demo jest ładowane dynamicznie w tle, więc Three.js nie opóźnia logo ani fil
 
 | Etap | Implementacja | Zachowanie |
 | --- | --- | --- |
-| 1. Logo | `src/intro/logo-stage.js`, `src/intro/logo-stage.css` | Przezroczyste SVG jest wyświetlane przez dokładnie 2000 ms na białym tle. Następnie znika w szybkim fade 300 ms. |
+| 1. Logo | `src/intro/logo-stage.js`, `src/intro/logo-stage.css` | Przezroczyste SVG jest wyświetlane przez dokładnie 2000 ms na tle strony (`--bg`, krem `#fef2e4`). Znak jest wyśrodkowany i ma ograniczoną szerokość oraz wysokość, więc nigdy nie wychodzi poza viewport. Następnie znika w szybkim fade 300 ms. |
 | 2. Film | `src/intro/video-stage.js`, `src/intro/video-stage.css`, `src/intro/index.js` | Wideo YouTube jest przygotowywane za logo, potem widoczne przez 4000 ms. Działa Skip, Escape i awaryjne „Tap to begin”. |
 | 3. Demo | `src/demo/`, `src/demo-loader.js` | Lazy-loadowane demo Three.js. Przy wolnym ładowaniu widać postęp, a przy błędzie komunikat i Retry. |
 
@@ -33,7 +33,7 @@ src/style.css                           # wspólna powłoka, loader i błędy
 src/intro/index.js                      # składa logo i film, obsługuje YouTube
 src/intro/timeline.js                   # czasy oraz przejścia intro, bez DOM
 src/intro/logo-stage.js                 # DOM wyłącznie etapu logo
-src/intro/logo-stage.css                # biały ekran i fade logo
+src/intro/logo-stage.css                # wyśrodkowany znak i fade logo
 src/intro/video-stage.js                # DOM wyłącznie etapu filmu
 src/intro/video-stage.css               # widoczność filmu i crossfade
 src/intro/intro.css                     # kontrolki filmu i handoff
@@ -41,6 +41,10 @@ src/demo-loader.js                      # load/ready/error/retry dla demo
 src/demo/index.js                       # publiczne createDemo i runtime Three.js
 src/demo/terrain.js                     # deterministyczna geometria terenu
 public/brand/airtriage-logo.svg         # produkcyjne logo wektorowe bez tła
+public/brand/favicon-square.svg         # kwadratowa ikona z kremową płytką
+public/brand/favicon.svg                # oryginalna szeroka ikona drona
+public/favicon-32.png                   # raster 32x32
+public/apple-touch-icon.png             # raster 180x180
 docs/assets/airtriage-logo-reference.jpg # dostarczony raster referencyjny
 public/CNAME                            # domena produkcyjna
 .github/workflows/deploy-pages.yml      # test, build i deployment
@@ -63,6 +67,18 @@ proporcje i kontury dostarczonego znaku 1024×411, składa się z wektorowych ś
 i nie zawiera białego prostokąta ani osadzonego obrazu rastrowego. JPG w
 `docs/assets/` służy jedynie jako materiał referencyjny i nie jest pobierany przez
 stronę.
+
+Canvas SVG to dokładnie `viewBox="0 0 1024 411"`. Współrzędne ścieżki pozostają w
+układzie po eksporcie A4, a transform `translate(-162.859,-851.546) scale(6.68276)`
+mapuje prostokąt artwork (24.37 140.85 153.23 34.65) na wyśrodkowany canvas 1024×411.
+Nie zmieniaj `viewBox` bez aktualizacji `test/brand-logo.test.mjs`, który go pilnuje.
+
+Stage logo nie ustawia własnego tła — tło daje `.intro` przez `var(--bg)`. Dzięki temu
+splash i hand-off mają ten sam kolor.
+
+Ikony strony: `public/brand/favicon-square.svg` (kwadratowa, z kremową płytką
+`#fef2e4`, żeby znak był czytelny na ciemnym pasku przeglądarki), plus rastry
+`public/favicon-32.png` i `public/apple-touch-icon.png`.
 
 ## Development lokalny
 

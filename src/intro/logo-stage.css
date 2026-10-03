@@ -5,7 +5,9 @@
   display: grid;
   place-items: center;
   padding: clamp(1.5rem, 6vw, 5rem);
-  background: #fff;
+  /* Transparent on purpose: .intro paints the shared page background, so the
+     splash and the hand-off are the same colour. */
+  background: transparent;
   opacity: 1;
   visibility: visible;
   transition:
@@ -15,8 +17,15 @@
 
 .intro-logo__image {
   display: block;
-  width: min(82vw, 1024px);
+  width: auto;
   height: auto;
+  /*
+   * Cap both axes rather than driving width alone: the mark is a wide 1024x411
+   * canvas, so a width-driven size overflows short landscape viewports.
+   */
+  max-width: min(82vw, 1024px);
+  max-height: 62vh;
+  object-fit: contain;
 }
 
 .intro[data-phase='video'] .intro-logo,

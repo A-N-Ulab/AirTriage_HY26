@@ -35,7 +35,7 @@ async function expectReadyTerrain(page, screenshotName) {
   await page.screenshot({ path: `test-results/${screenshotName}`, fullPage: true })
 }
 
-test('shows the standalone logo stage on white before crossfading to the film', async ({ page }) => {
+test('shows the standalone logo stage on the page background before crossfading to the film', async ({ page }) => {
   await blockVideo(page)
   await page.goto('/')
 
@@ -45,7 +45,7 @@ test('shows the standalone logo stage on white before crossfading to the film', 
   await expect(logo).toBeVisible()
   await expect(logo).toHaveAttribute('src', '/brand/airtriage-logo.svg')
   expect(await intro.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
-    'rgb(255, 255, 255)',
+    'rgb(254, 242, 228)',
   )
   expect(
     await page
@@ -55,6 +55,48 @@ test('shows the standalone logo stage on white before crossfading to the film', 
 
   await expect(intro).toHaveAttribute('data-phase', 'video', { timeout: 2500 })
   await expect(logo).toBeHidden()
+})
+
+test('centres the logo mark without clipping it at any viewport', async ({ page }) => {
+  await blockVideo(page)
+  // This check only looks at the splash. Block the demo chunk so the repeated
+  // viewports never spin up a WebGL context and starve the tests that follow.
+  await page.route('**/assets/demo-*.js', (route) => route.abort())
+
+  const viewports = [
+    { width: 1920, height: 1080 },
+    { width: 1440, height: 900 },
+    { width: 1280, height: 720 },
+    { width: 1024, height: 640 },
+    { width: 390, height: 844 },
+    { width: 320, height: 568 },
+  ]
+
+  for (const viewport of viewports) {
+    const label = viewport.width + 'x' + viewport.height
+    await page.setViewportSize(viewport)
+    await page.goto('/')
+    await expect(page.locator('.intro')).toHaveAttribute('data-phase', 'logo')
+
+    const box = await page.locator('.intro-logo__image').boundingBox()
+    expect(box, 'logo mark is missing at ' + label).not.toBeNull()
+
+    // The mark is a wide 1024x411 canvas: sizing on width alone used to
+    // overflow short landscape viewports and push the wordmark below the fold.
+    expect(box.x, 'clipped on the left at ' + label).toBeGreaterThanOrEqual(-0.5)
+    expect(box.y, 'clipped at the top at ' + label).toBeGreaterThanOrEqual(-0.5)
+    expect(box.x + box.width, 'clipped on the right at ' + label).toBeLessThanOrEqual(
+      viewport.width + 0.5,
+    )
+    expect(box.y + box.height, 'clipped at the bottom at ' + label).toBeLessThanOrEqual(
+      viewport.height + 0.5,
+    )
+
+    const offsetX = Math.abs(box.x + box.width / 2 - viewport.width / 2)
+    const offsetY = Math.abs(box.y + box.height / 2 - viewport.height / 2)
+    expect(offsetX, 'not horizontally centred at ' + label).toBeLessThanOrEqual(1)
+    expect(offsetY, 'not vertically centred at ' + label).toBeLessThanOrEqual(1)
+  }
 })
 
 test('renders the terrain at a desktop viewport', async ({ page }) => {
