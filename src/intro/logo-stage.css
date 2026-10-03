@@ -1,0 +1,39 @@
+.intro-logo {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 6vw, 5rem);
+  background: #fff;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s linear 0s;
+}
+
+.intro-logo__image {
+  display: block;
+  width: min(82vw, 1024px);
+  height: auto;
+}
+
+.intro[data-phase='video'] .intro-logo,
+.intro[data-phase='handoff'] .intro-logo,
+.intro[data-phase='done'] .intro-logo {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease,
+    visibility 0s linear 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-logo,
+  .intro[data-phase='video'] .intro-logo,
+  .intro[data-phase='handoff'] .intro-logo,
+  .intro[data-phase='done'] .intro-logo {
+    transition-duration: 0.15s, 0s;
+  }
+}

@@ -9,7 +9,15 @@ const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '..')
 const introRoot = join(projectRoot, 'src', 'intro')
 
 test('intro lives in its own folder', () => {
-  for (const file of ['index.js', 'timeline.js', 'intro.css']) {
+  for (const file of [
+    'index.js',
+    'timeline.js',
+    'intro.css',
+    'logo-stage.js',
+    'logo-stage.css',
+    'video-stage.js',
+    'video-stage.css',
+  ]) {
     assert.equal(existsSync(join(introRoot, file)), true, `${file} is missing`)
   }
 })
@@ -20,6 +28,27 @@ test('intro has no demo or Three.js dependency', () => {
     .join('\n')
 
   assert.doesNotMatch(sources, /(?:from\s+['"]three['"]|\/demo\/)/)
+})
+
+test('logo and film stages can be developed without importing each other', () => {
+  const logoPath = join(introRoot, 'logo-stage.js')
+  const videoPath = join(introRoot, 'video-stage.js')
+
+  assert.equal(existsSync(logoPath), true, 'logo stage module is missing')
+  assert.equal(existsSync(videoPath), true, 'film stage module is missing')
+
+  const logoSource = readFileSync(logoPath, 'utf8')
+  const videoSource = readFileSync(videoPath, 'utf8')
+
+  assert.doesNotMatch(logoSource, /(?:youtube|iframe|video-stage)/i)
+  assert.doesNotMatch(videoSource, /(?:airtriage-logo|logo-stage)/i)
+})
+
+test('the intro coordinator composes the independent logo and film stages', () => {
+  const source = readFileSync(join(introRoot, 'index.js'), 'utf8')
+
+  assert.match(source, /import\s+\{\s*createLogoStage\s*\}\s+from\s+['"]\.\/logo-stage\.js['"]/)
+  assert.match(source, /import\s+\{\s*createVideoStage\s*\}\s+from\s+['"]\.\/video-stage\.js['"]/)
 })
 
 test('legacy intro files are removed from the source root', () => {

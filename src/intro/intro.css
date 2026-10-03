@@ -1,4 +1,4 @@
-/* Full-screen intro overlay: wordmark -> drone footage -> hand-off. */
+/* Full-screen coordinator: logo -> drone footage -> demo hand-off. */
 
 .intro {
   position: fixed;
@@ -6,6 +6,7 @@
   z-index: 10;
   overflow: hidden;
   pointer-events: none;
+  background: #fff;
   opacity: 1;
   transition: opacity 0.6s ease;
 }
@@ -21,7 +22,7 @@
   inset: 0;
   overflow: hidden;
   opacity: 0;
-  transition: opacity 0.6s ease;
+  transition: opacity 0.3s ease;
 }
 
 .intro__drift {
@@ -96,57 +97,6 @@
       rgba(254, 242, 228, 0) 46%,
       rgba(254, 242, 228, 0.5) 100%
     );
-}
-
-/* ------------------------------------------------------------ wordmark -- */
-
-.intro__stage {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 2rem;
-  opacity: 1;
-  transform: scale(1);
-  filter: blur(0);
-  transition:
-    opacity 0.6s ease,
-    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
-    filter 0.6s ease;
-}
-
-.intro__wordmark {
-  display: flex;
-  margin: 0;
-  font-family: var(--font-title);
-  font-size: clamp(3rem, 10.5vw, 8.5rem);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: 0.02em;
-  color: var(--primary);
-}
-
-.intro__wordmark span {
-  display: inline-block;
-  animation: intro-letter 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  animation-delay: calc(var(--i) * 40ms);
-}
-
-@keyframes intro-letter {
-  from {
-    opacity: 0;
-    transform: translateY(0.35em);
-    filter: blur(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-    filter: blur(0);
-  }
 }
 
 .intro__accent {
@@ -291,58 +241,43 @@
 
 /* ------------------------------------------------------- phase states -- */
 
-.intro[data-phase='dissolve'] .intro__media,
-.intro[data-phase='cruise'] .intro__media {
+.intro[data-phase='video'] .intro__media {
   opacity: 1;
 }
 
-.intro[data-phase='dissolve'] .intro__drift,
-.intro[data-phase='cruise'] .intro__drift {
+.intro[data-phase='video'] .intro__drift {
   animation-play-state: running;
 }
 
-.intro[data-phase='dissolve'] .intro__scrim {
-  opacity: 0.5;
-}
-
-.intro[data-phase='cruise'] .intro__scrim {
+.intro[data-phase='video'] .intro__scrim {
   opacity: 1;
 }
 
-.intro[data-phase='cruise'] .intro__lockup,
-.intro[data-phase='cruise'] .intro__skip {
+.intro[data-phase='video'] .intro__lockup,
+.intro[data-phase='video'] .intro__skip {
   opacity: 1;
   transform: none;
 }
 
 .intro[data-phase='handoff'] .intro__media,
 .intro[data-phase='handoff'] .intro__scrim,
-.intro[data-phase='settle'] .intro__media,
-.intro[data-phase='settle'] .intro__scrim {
+.intro[data-phase='done'] .intro__media,
+.intro[data-phase='done'] .intro__scrim {
   opacity: 0;
 }
 
 .intro[data-phase='handoff'] .intro__drift,
-.intro[data-phase='settle'] .intro__drift {
+.intro[data-phase='done'] .intro__drift {
   animation-play-state: paused;
 }
 
 .intro[data-phase='handoff'] .intro__lockup,
 .intro[data-phase='handoff'] .intro__skip,
 .intro[data-phase='handoff'] .intro__tap,
-.intro[data-phase='settle'] .intro__lockup,
-.intro[data-phase='settle'] .intro__skip,
-.intro[data-phase='settle'] .intro__tap {
+.intro[data-phase='done'] .intro__lockup,
+.intro[data-phase='done'] .intro__skip,
+.intro[data-phase='done'] .intro__tap {
   opacity: 0;
-}
-
-.intro[data-phase='handoff'] .intro__stage,
-.intro[data-phase='cruise'] .intro__stage,
-.intro[data-phase='settle'] .intro__stage,
-.intro[data-phase='done'] .intro__stage {
-  opacity: 0;
-  transform: scale(1.08);
-  filter: blur(10px);
 }
 
 .intro[data-phase='handoff'] .intro__lockup {
@@ -360,23 +295,9 @@
     animation: none;
   }
 
-  .intro__wordmark span {
-    animation: none;
-    opacity: 1;
-  }
-
   .intro__accent {
     animation: none;
     transform: scaleX(1);
   }
 
-  .intro__stage,
-  .intro[data-phase='handoff'] .intro__stage,
-  .intro[data-phase='cruise'] .intro__stage,
-  .intro[data-phase='settle'] .intro__stage,
-  .intro[data-phase='done'] .intro__stage {
-    transform: none;
-    filter: none;
-    transition: opacity 0.4s linear;
-  }
 }

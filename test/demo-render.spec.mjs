@@ -35,6 +35,28 @@ async function expectReadyTerrain(page, screenshotName) {
   await page.screenshot({ path: `test-results/${screenshotName}`, fullPage: true })
 }
 
+test('shows the standalone logo stage on white before crossfading to the film', async ({ page }) => {
+  await blockVideo(page)
+  await page.goto('/')
+
+  const intro = page.locator('.intro')
+  const logo = page.locator('.intro-logo__image')
+  await expect(intro).toHaveAttribute('data-phase', 'logo')
+  await expect(logo).toBeVisible()
+  await expect(logo).toHaveAttribute('src', '/brand/airtriage-logo.svg')
+  expect(await intro.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
+    'rgb(255, 255, 255)',
+  )
+  expect(
+    await page
+      .locator('.intro__media')
+      .evaluate((element) => getComputedStyle(element).transitionDuration),
+  ).toBe('0.3s')
+
+  await expect(intro).toHaveAttribute('data-phase', 'video', { timeout: 2500 })
+  await expect(logo).toBeHidden()
+})
+
 test('renders the terrain at a desktop viewport', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await expectReadyTerrain(page, 'demo-desktop.png')

@@ -1,13 +1,17 @@
 # AirTriage_HY26
 
-AirTriage is a Vite single-page experience with two deliberately independent parts:
+AirTriage is a Vite single-page experience with three deliberately independent stages:
 
-1. a lightweight branded film intro that starts immediately;
-2. a lazy-loaded Three.js terrain demo that downloads in the background.
+1. a two-second SVG logo splash on white;
+2. a lightweight branded film;
+3. a lazy-loaded Three.js terrain demo that downloads in the background.
 
 The intro hands off without a page reload. If the demo is still loading, the visitor
 sees a full-screen progress surface. A failed module download or unavailable WebGL
 renderer produces a readable error with a Retry button rather than an empty canvas.
+
+For a compact map of the current architecture, assets, commands, and exact deployment
+flow, start with [`PROJECT_CONTEXT.md`](PROJECT_CONTEXT.md).
 
 ## Architecture
 
@@ -21,9 +25,13 @@ src/
 |-- demo-loader.js          # loading, ready, error and retry states
 |-- style.css               # shared shell and loading/error presentation
 |-- intro/
-|   |-- index.js            # video overlay and public playIntro API
+|   |-- index.js            # logo/film coordinator and public playIntro API
 |   |-- timeline.js         # DOM-independent intro state machine
-|   `-- intro.css           # intro-only presentation
+|   |-- logo-stage.js       # logo-only DOM
+|   |-- logo-stage.css      # white splash and fast crossfade
+|   |-- video-stage.js      # film-only DOM
+|   |-- video-stage.css     # film visibility and crossfade
+|   `-- intro.css           # shared film controls and handoff presentation
 `-- demo/
     |-- index.js            # public createDemo API and Three.js runtime
     |-- terrain.js          # deterministic terrain geometry and colors
@@ -42,18 +50,23 @@ development inside `src/demo/` and allows the film to evolve independently in
 
 ## Intro sequence
 
-`src/intro/index.js` plays a short wordmark and drone-film sequence:
+The opening has three user-visible stages. Logo and film have separate source modules;
+the demo remains an independent lazy-loaded bundle.
 
-| Beat | Duration | What happens |
+| Stage | Duration | What happens |
 | --- | --- | --- |
-| `title` | 1000 ms | AirTriage wordmark and accent enter |
-| `dissolve` | 600 ms | Wordmark dissolves into the film |
-| `cruise` | 4000 ms | Muted drone footage and Skip control |
-| `handoff` | 600 ms | Film fades toward the loading/demo shell |
-| `settle` | 800 ms | The underlying shell is revealed |
+| `logo` | 2000 ms | The exact transparent SVG mark sits on pure white |
+| `video` | 4000 ms | A 300 ms crossfade reveals muted drone footage and Skip |
+| `demo` | ongoing | The terrain or its loading/error surface takes over |
+
+The film-to-demo handoff lasts 600 ms and is a transition rather than another stage.
 
 The film is a muted `youtube-nocookie.com` embed. `Escape` or **Skip** jumps to the
 handoff. Blocked autoplay displays **Tap to begin** and can never trap the visitor.
+
+The production mark is `public/brand/airtriage-logo.svg`. It contains vector paths and
+no background or embedded raster. The supplied JPG is retained only as
+`docs/assets/airtriage-logo-reference.jpg`.
 
 ## Background loading and failures
 

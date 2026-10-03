@@ -1,11 +1,12 @@
 import './intro.css'
+import { createLogoStage } from './logo-stage.js'
+import { createVideoStage } from './video-stage.js'
 import { PHASE, YT_PLAYING, createIntroLoader } from './timeline.js'
 
 const VIDEO_ID = 'egf9XjBIgF0'
 // Tweak these two to pick a different moment of the drone reel.
 const SEGMENT_START = 85
 const SEGMENT_END = 100
-const BRAND = 'AirTriage'
 
 const EMBED_ORIGINS = [
   'https://www.youtube-nocookie.com',
@@ -14,9 +15,6 @@ const EMBED_ORIGINS = [
 
 const reducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-const letters = (word) =>
-  [...word].map((ch, i) => `<span style="--i:${i}">${ch}</span>`).join('')
 
 function embedSrc() {
   const params = new URLSearchParams({
@@ -37,48 +35,11 @@ function embedSrc() {
   return `https://www.youtube-nocookie.com/embed/${VIDEO_ID}?${params}`
 }
 
-const TEMPLATE = `
-  <div class="intro__media" aria-hidden="true">
-    <div class="intro__drift">
-      <iframe
-        class="intro__iframe"
-        title="Drone footage over the Tatra mountains"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowfullscreen
-        tabindex="-1"
-      ></iframe>
-    </div>
-    <div class="intro__shield"></div>
-  </div>
-
-  <div class="intro__scrim" aria-hidden="true"></div>
-
-  <div class="intro__stage">
-    <h1 class="intro__wordmark">${letters(BRAND)}</h1>
-    <span class="intro__accent" aria-hidden="true"></span>
-  </div>
-
-  <div class="intro__lockup" aria-hidden="true">
-    <span class="intro__accent intro__accent--lockup"></span>
-    <span class="intro__name">${BRAND}</span>
-  </div>
-
-  <button class="intro__skip" type="button">
-    Skip <span aria-hidden="true">&rarr;</span>
-  </button>
-
-  <button class="intro__tap" type="button">Tap to begin</button>
-
-  <div class="intro__progress" role="presentation">
-    <i class="intro__progress-bar"></i>
-  </div>
-`
-
 export function playIntro({ revealTarget } = {}) {
   const overlay = document.createElement('div')
   overlay.className = 'intro'
   overlay.dataset.phase = PHASE.IDLE
-  overlay.innerHTML = TEMPLATE
+  overlay.append(createVideoStage(), createLogoStage())
   document.body.append(overlay)
 
   const iframe = overlay.querySelector('.intro__iframe')
@@ -91,7 +52,7 @@ export function playIntro({ revealTarget } = {}) {
       overlay.dataset.phase = phase
       bar.style.transform = `scaleX(${progress.toFixed(4)})`
 
-      if (phase === PHASE.HANDOFF || phase === PHASE.SETTLE) {
+      if (phase === PHASE.HANDOFF) {
         revealTarget?.classList.add('is-revealed')
       }
     },
