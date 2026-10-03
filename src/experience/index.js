@@ -9,8 +9,8 @@ const pageMarkup = `
       </a>
       <nav class="experience-tabs" aria-label="Sekcje strony">
         <a href="#nasze-przyklady">Nasze przykłady</a>
-        <a href="#nasz-wklad">Nasz wkład</a>
-        <a href="#poparcie-naukowe">Poparcie naukowe</a>
+        <a href="#nasz-wklad">Widok operatora</a>
+        <a href="#algorytm-i-podstawa-naukowa">Algorytm i podstawa naukowa</a>
       </nav>
     </header>
 
@@ -55,7 +55,7 @@ const pageMarkup = `
       <section class="content-section content-section--contribution" id="nasz-wklad">
         <div class="section-heading">
           <p class="section-heading__index" aria-hidden="true">02</p>
-          <h2>Nasz wkład</h2>
+          <h2>Widok operatora</h2>
         </div>
 
         <div class="contribution-body">
@@ -79,7 +79,7 @@ const pageMarkup = `
             <div class="scrub-film__veil" aria-hidden="true"></div>
             <p class="scrub-film__hint">
               <span aria-hidden="true">←</span>
-              Przeciągnij, aby obrócić
+              Przeciągnij, aby przeanalizować
               <span aria-hidden="true">→</span>
             </p>
             <p class="scrub-film__fallback" role="status">
@@ -87,20 +87,160 @@ const pageMarkup = `
             </p>
           </div>
           <div class="contribution-caption">
-            <p class="contribution-caption__label">Widok operatora dronu</p>
-            <p>Tu będzie opis</p>
+            <p class="contribution-caption__label">Interaktywny podgląd</p>
+            <p>
+              Przeciągnij obraz w poziomie, aby prześledzić nagranie klatka po klatce
+              z perspektywy operatora dronu.
+            </p>
           </div>
         </div>
       </section>
 
-      <section class="content-section content-section--science" id="poparcie-naukowe">
+      <section
+        class="content-section content-section--science"
+        id="algorytm-i-podstawa-naukowa"
+      >
         <div class="section-heading">
           <p class="section-heading__index" aria-hidden="true">03</p>
-          <h2>Poparcie naukowe</h2>
+          <h2>Algorytm i podstawa naukowa</h2>
         </div>
-        <div class="science-copy">
-          <span class="science-copy__rule" aria-hidden="true"></span>
-          <p>Tu będzie opis</p>
+
+        <div class="science-content">
+          <p class="science-lead">
+            AirTriage porządkuje zdalną obserwację osoby i wskazuje operatorowi,
+            który pomiar wymaga uwagi. Demonstrator analizuje ruch, tętno (HR)
+            i częstość oddechu (RR), ale nie zastępuje decyzji ratownika ani
+            pełnego triażu medycznego.
+          </p>
+
+          <div class="algorithm-panel" aria-labelledby="algorithm-title">
+            <div class="algorithm-panel__heading">
+              <p>Algorytm demonstratora</p>
+              <h3 id="algorithm-title">Od wykrycia do czytelnego sygnału</h3>
+            </div>
+
+            <ol class="algorithm-flow">
+              <li>
+                <span class="algorithm-flow__number" aria-hidden="true">01</span>
+                <strong>Wykrycie osoby</strong>
+                <span>Operator kieruje kamerę i stabilizuje kadr.</span>
+              </li>
+              <li>
+                <span class="algorithm-flow__number" aria-hidden="true">02</span>
+                <strong>Obserwacja przez 30 sekund</strong>
+                <span>System ocenia ruch oraz zbiera HR i RR równolegle.</span>
+              </li>
+              <li>
+                <span class="algorithm-flow__number" aria-hidden="true">03</span>
+                <strong>Kontrola wiarygodności</strong>
+                <span>Tylko dostępny, stabilny pomiar może uruchomić alarm.</span>
+              </li>
+            </ol>
+
+            <div class="algorithm-outcomes" aria-label="Możliwe wyniki algorytmu">
+              <article class="algorithm-outcome algorithm-outcome--red">
+                <p class="algorithm-outcome__status">Czerwony</p>
+                <h4>Sprawdź pilnie</h4>
+                <p>
+                  Wiarygodny pomiar: <strong>HR ≤40 lub ≥131/min</strong>, albo
+                  <strong>RR ≤8 lub ≥25/min</strong>.
+                </p>
+              </article>
+              <article class="algorithm-outcome algorithm-outcome--yellow">
+                <p class="algorithm-outcome__status">Żółty</p>
+                <h4>Sprawdź lub zmierz ponownie</h4>
+                <p>
+                  Brak odczytu, ruch zakłócający pomiar lub wynik pośredni:
+                  HR 41–50 / 91–130 albo RR 9–11 / 21–24.
+                </p>
+              </article>
+              <article class="algorithm-outcome algorithm-outcome--green">
+                <p class="algorithm-outcome__status">Zielony</p>
+                <h4>Brak alarmu w pomiarach</h4>
+                <p>
+                  Oba pomiary są dostępne: <strong>HR 51–90/min</strong> oraz
+                  <strong>RR 12–20/min</strong>. To nie oznacza „osoba zdrowa”.
+                </p>
+              </article>
+            </div>
+
+            <p class="algorithm-panel__note">
+              <strong>Czerwony ma pierwszeństwo przed żółtym i zielonym.</strong>
+              Dopiero gdy nie ma wiarygodnego czerwonego alarmu, brak odczytu lub
+              wynik pośredni prowadzi do żółtego; zielony wymaga obu dostępnych
+              pomiarów bez odchyleń. Alarm czerwony może pojawić się przed końcem
+              obserwacji.
+            </p>
+          </div>
+
+          <div class="evidence-section">
+            <div class="evidence-section__heading">
+              <p>Podstawa naukowa</p>
+              <h3>Co pochodzi z badań, a co jest decyzją POC</h3>
+            </div>
+
+            <div class="evidence-grid">
+              <article class="evidence-source">
+                <p class="evidence-source__index">01 / NEWS2</p>
+                <h4>Progi HR i RR</h4>
+                <p>
+                  Pasma czerwone, żółte i bez odchyleń oparto na NEWS2 — systemie
+                  wczesnego ostrzegania dla dorosłych. Nie oznacza to walidacji
+                  AirTriage jako systemu triażu.
+                </p>
+                <a href="https://www.rcp.ac.uk/media/a4ibkkbf/news2-final-report_0_0.pdf">
+                  Raport Royal College of Physicians
+                </a>
+              </article>
+
+              <article class="evidence-source">
+                <p class="evidence-source__index">02 / Scientific Reports</p>
+                <h4>Bezkontaktowy pomiar parametrów</h4>
+                <p>
+                  Badanie algorytmów dla dronowego triażu analizowało 13-sekundowe
+                  okna HR i 15-sekundowe okna RR oraz wskazało ruch i warunki
+                  pomiaru jako istotne ograniczenia.
+                </p>
+                <a href="https://doi.org/10.1038/s41598-026-40691-4">
+                  Tayfur i wsp., 2026
+                </a>
+              </article>
+
+              <article class="evidence-source">
+                <p class="evidence-source__index">03 / Drones</p>
+                <h4>Czas obserwacji</h4>
+                <p>
+                  Trzydzieści sekund odpowiada długości nagrań wykorzystanych
+                  w terenowym badaniu półautomatycznej kategoryzacji z użyciem UAV.
+                  Cel 35–40 sekund całej obsługi pozostaje założeniem do pomiaru.
+                </p>
+                <a href="https://doi.org/10.3390/drones8100589">
+                  Mösch i wsp., 2024
+                </a>
+              </article>
+
+              <article class="evidence-source">
+                <p class="evidence-source__index">04 / Kontekst kliniczny</p>
+                <h4>Wynik wymaga interpretacji</h4>
+                <p>
+                  Podwyższone tętno może wynikać także z wysiłku. Sam HR nie pozwala
+                  odróżnić aktywności fizycznej od urazu lub pogorszenia stanu.
+                </p>
+                <a href="https://www.heart.org/en/healthy-living/exercise-and-physical-activity/fitness-basics/target-heart-rates">
+                  American Heart Association
+                </a>
+              </article>
+            </div>
+          </div>
+
+          <aside class="science-scope" aria-label="Zakres demonstratora">
+            <p>Zakres POC</p>
+            <p>
+              Kolory są propozycją interfejsu AirTriage. Demonstrator nie oblicza
+              pełnego NEWS2, START ani MITT; nie ocenia krwawienia, reakcji na głos
+              ani kategorii medycznej na podstawie temperatury.
+            </p>
+          </aside>
         </div>
       </section>
     </div>

@@ -21,10 +21,12 @@ The intro hands off without a page reload. `Escape`, an intro-media error, or a
 - shows readable fallback copy if the media cannot load.
 
 The page begins with `Nasze przykłady`, whose two example-film cards use text
-placeholders until their media is supplied. `Nasz wkład` follows with the
-interactive film captioned `Widok operatora dronu`, then `Poparcie naukowe`.
+placeholders until their media is supplied. `Widok operatora` follows with the
+interactive film, then `Algorytm i podstawa naukowa` presents the POC decision
+flow, measurement thresholds, limitations, and source links as semantic HTML.
 Rapid pointer moves are coalesced and an in-progress seek finishes before the
-latest requested frame is applied, avoiding overlapping decoder work.
+latest requested frame is applied, avoiding overlapping decoder work. The MP4
+stores its metadata first and uses keyframes every 200 ms for responsive seeks.
 
 ## Architecture
 
@@ -69,10 +71,11 @@ npm run test:render
 ```
 
 The Node suite covers the intro timeline, loading/error behavior, lazy module
-boundary, brand asset, and drag calculations. The Playwright suite covers the
-full intro handoff, desktop/mobile layout, midpoint initialization, dragging,
-fallback copy, and failed/delayed chunks. Set `PLAYWRIGHT_CHROMIUM_PATH` to an
-existing Chrome or Chromium binary when the bundled browser is unavailable.
+boundary, brand asset, drag calculations, and MP4 seek metadata. The Playwright
+suite covers the full intro handoff, desktop/mobile layout, scientific content,
+midpoint initialization, dragging, fallback copy, and failed/delayed chunks.
+Set `PLAYWRIGHT_CHROMIUM_PATH` to an existing Chrome or Chromium binary when the
+bundled browser is unavailable.
 
 ## Deployment
 

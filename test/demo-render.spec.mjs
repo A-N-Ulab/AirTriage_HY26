@@ -7,6 +7,7 @@ async function skipIntro(page) {
   await expect(page.locator('.intro')).toBeAttached()
   await page.keyboard.press('Escape')
   await expect(page.locator('[data-demo-shell]')).toHaveClass(/is-revealed/)
+  await expect(page.locator('.intro')).toHaveCount(0)
 }
 
 async function expectReadyExperience(page, screenshotName) {
@@ -18,7 +19,7 @@ async function expectReadyExperience(page, screenshotName) {
   await expect(page.locator('.experience')).toBeVisible()
   await expect(page.locator('#nasze-przyklady')).toBeVisible()
   await expect(page.locator('#nasz-wklad')).toBeVisible()
-  await expect(page.locator('#poparcie-naukowe')).toBeVisible()
+  await expect(page.locator('#algorytm-i-podstawa-naukowa')).toBeVisible()
 
   const hasOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
@@ -148,8 +149,25 @@ test('renders the interactive page at a desktop viewport', async ({ page }) => {
     await page.locator('.experience-content > section').evaluateAll((sections) =>
       sections.map((section) => section.id),
     ),
-  ).toEqual(['nasze-przyklady', 'nasz-wklad', 'poparcie-naukowe'])
-  await expect(page.locator('#nasz-wklad')).toContainText('Widok operatora dronu')
+  ).toEqual(['nasze-przyklady', 'nasz-wklad', 'algorytm-i-podstawa-naukowa'])
+  await expect(page.locator('#nasz-wklad h2')).toHaveText('Widok operatora')
+})
+
+test('presents the algorithm and evidence as structured HTML', async ({ page }) => {
+  await skipIntro(page)
+
+  const science = page.locator('#algorytm-i-podstawa-naukowa')
+  await expect(science.getByRole('heading', { name: 'Algorytm i podstawa naukowa' })).toBeVisible()
+  await expect(science.locator('.algorithm-flow > li')).toHaveCount(3)
+  expect(
+    await science
+      .locator('.algorithm-flow__number')
+      .evaluateAll((numbers) => numbers.every((number) => number.getAttribute('aria-hidden') === 'true')),
+  ).toBe(true)
+  await expect(science.locator('.algorithm-outcome')).toHaveCount(3)
+  await expect(science.locator('.evidence-source')).toHaveCount(4)
+  await expect(science).toContainText('Czerwony ma pierwszeństwo przed żółtym i zielonym')
+  await expect(science).toContainText('nie zastępuje decyzji ratownika')
 })
 
 test('renders the interactive page without overflow at a mobile viewport', async ({ page }) => {
@@ -193,6 +211,7 @@ test('keeps the main film paused at its midpoint and scrubs it by dragging', asy
   }))
   expect(Math.abs(midpoint.currentTime - midpoint.duration / 2)).toBeLessThan(0.35)
 
+  await surface.scrollIntoViewIfNeeded()
   const box = await surface.boundingBox()
   await page.mouse.move(box.x + box.width * 0.4, box.y + box.height / 2)
   await page.mouse.down()
@@ -211,7 +230,7 @@ test('shows text placeholders for example films that will be added later', async
   await expect(page.locator('#nasze-przyklady .example-card__placeholder').first()).toContainText(
     'Film przykładowy zostanie dodany później',
   )
-  await expect(page.getByText('Tu będzie opis', { exact: true })).toHaveCount(4)
+  await expect(page.getByText('Tu będzie opis', { exact: true })).toHaveCount(2)
 })
 
 test('keeps the page usable when the interactive film fails', async ({ page }) => {
@@ -220,7 +239,7 @@ test('keeps the page usable when the interactive film fails', async ({ page }) =
 
   await expect(page.locator('.scrub-film__fallback')).toBeVisible()
   await expect(page.locator('#nasz-wklad')).toBeVisible()
-  await expect(page.locator('#poparcie-naukowe')).toBeVisible()
+  await expect(page.locator('#algorytm-i-podstawa-naukowa')).toBeVisible()
 })
 
 test('keeps a polished loading surface visible while the page chunk is delayed', async ({ page }) => {
