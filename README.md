@@ -20,9 +20,11 @@ The intro hands off without a page reload. `Escape`, an intro-media error, or a
 - supports mouse, pen, and touch through Pointer Events;
 - shows readable fallback copy if the media cannot load.
 
-The page includes anchor tabs for the film, `Nasz wkład`, and
-`Poparcie naukowe`. The two example-film cards intentionally use text
-placeholders until their media is supplied.
+The page begins with `Nasze przykłady`, whose two example-film cards use text
+placeholders until their media is supplied. `Nasz wkład` follows with the
+interactive film captioned `Widok operatora dronu`, then `Poparcie naukowe`.
+Rapid pointer moves are coalesced and an in-progress seek finishes before the
+latest requested frame is applied, avoiding overlapping decoder work.
 
 ## Architecture
 

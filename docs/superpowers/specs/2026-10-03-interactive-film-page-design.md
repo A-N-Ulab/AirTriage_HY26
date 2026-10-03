@@ -16,9 +16,10 @@ Replace the full-screen Three.js mountain shown after the existing intro with a 
 
 ## Page structure
 
-- A compact AirTriage header provides anchor-style tabs for the main interactive film, `Nasz wkład`, and `Poparcie naukowe`.
-- `Nasz wkład` contains two side-by-side example cards on desktop and a single column on small screens.
+- A compact AirTriage header provides anchor-style tabs for `Nasze przykłady`, `Nasz wkład`, and `Poparcie naukowe`.
+- `Nasze przykłady` appears first and contains two side-by-side example cards on desktop and a single column on small screens.
 - Until the two example films arrive, each card shows an explicit alternative-text placeholder rather than a broken or empty video.
+- `Nasz wkład` appears below the examples and contains the interactive film captioned `Widok operatora dronu`.
 - All descriptive copy remains the placeholder `Tu będzie opis`.
 - `Poparcie naukowe` contains its heading and the same placeholder copy.
 
@@ -30,7 +31,7 @@ Retain the existing cream, forest-green, restrained AirTriage identity. Use gene
 
 - Preserve the intro as an independent subsystem.
 - Replace the lazy Three.js demo module with a lazy page module.
-- Put drag-to-scrub calculations and pointer lifecycle in a focused controller module with unit tests.
+- Put drag-to-scrub calculations and pointer lifecycle in a focused controller module with unit tests. Coalesce rapid pointer input and wait for an active media seek to finish before applying the latest requested time.
 - Keep the page markup and lifecycle in the experience module, with styles colocated in its stylesheet.
 - Remove the unused Three.js terrain code and dependency.
 
@@ -40,4 +41,3 @@ Retain the existing cream, forest-green, restrained AirTriage identity. Use gene
 - Anchor navigation uses semantic links and sections.
 - The film surface has an accessible label describing the drag interaction.
 - Reduced-motion users receive the same paused, manually scrubbed experience without added animation.
-

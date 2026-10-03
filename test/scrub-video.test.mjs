@@ -6,10 +6,21 @@ import { calculateScrubTime, createScrubController } from '../src/experience/scr
 class FakeVideo extends EventTarget {
   constructor({ duration = 20, readyState = 0 } = {}) {
     super()
-    this.currentTime = 0
+    this._currentTime = 0
+    this.timeWrites = 0
     this.duration = duration
     this.readyState = readyState
+    this.seeking = false
     this.pauseCalls = 0
+  }
+
+  get currentTime() {
+    return this._currentTime
+  }
+
+  set currentTime(value) {
+    this._currentTime = value
+    this.timeWrites += 1
   }
 
   pause() {
@@ -47,10 +58,15 @@ const pointerEvent = (type, { pointerId = 1, clientX = 0 } = {}) => {
   return event
 }
 
+const immediateFrame = (callback) => {
+  callback()
+  return 1
+}
+
 test('initialises the paused film at exactly half its duration when metadata loads', () => {
   const video = new FakeVideo({ duration: 18, readyState: 0 })
   const surface = new FakeSurface()
-  const controller = createScrubController({ video, surface })
+  const controller = createScrubController({ video, surface, scheduleFrame: immediateFrame })
 
   video.dispatchEvent(new Event('loadedmetadata'))
 
@@ -85,7 +101,7 @@ test('clamps drag seeking to the film bounds', () => {
 test('scrubs while dragging and clears the drag state on pointer cancellation', () => {
   const video = new FakeVideo({ duration: 20, readyState: 1 })
   const surface = new FakeSurface(200)
-  const controller = createScrubController({ video, surface })
+  const controller = createScrubController({ video, surface, scheduleFrame: immediateFrame })
 
   surface.dispatchEvent(pointerEvent('pointerdown', { pointerId: 7, clientX: 100 }))
   surface.dispatchEvent(pointerEvent('pointermove', { pointerId: 7, clientX: 150 }))
@@ -101,10 +117,71 @@ test('scrubs while dragging and clears the drag state on pointer cancellation', 
   controller.destroy()
 })
 
+test('coalesces rapid pointer moves into one seek to the latest requested frame', () => {
+  const video = new FakeVideo({ duration: 20, readyState: 1 })
+  const surface = new FakeSurface(200)
+  const queuedFrames = []
+  const controller = createScrubController({
+    video,
+    surface,
+    scheduleFrame: (callback) => {
+      queuedFrames.push(callback)
+      return queuedFrames.length
+    },
+    cancelFrame: () => {},
+  })
+  const writesAfterInitialisation = video.timeWrites
+
+  surface.dispatchEvent(pointerEvent('pointerdown', { pointerId: 4, clientX: 100 }))
+  surface.dispatchEvent(pointerEvent('pointermove', { pointerId: 4, clientX: 120 }))
+  surface.dispatchEvent(pointerEvent('pointermove', { pointerId: 4, clientX: 150 }))
+  surface.dispatchEvent(pointerEvent('pointermove', { pointerId: 4, clientX: 180 }))
+
+  assert.equal(video.timeWrites, writesAfterInitialisation)
+  assert.equal(queuedFrames.length, 1)
+
+  queuedFrames.shift()()
+
+  assert.equal(video.currentTime, 18)
+  assert.equal(video.timeWrites, writesAfterInitialisation + 1)
+  controller.destroy()
+})
+
+test('waits for an in-flight seek and then applies only the latest requested time', () => {
+  const video = new FakeVideo({ duration: 20, readyState: 1 })
+  const surface = new FakeSurface(200)
+  const queuedFrames = []
+  const controller = createScrubController({
+    video,
+    surface,
+    scheduleFrame: (callback) => {
+      queuedFrames.push(callback)
+      return queuedFrames.length
+    },
+    cancelFrame: () => {},
+  })
+  const writesAfterInitialisation = video.timeWrites
+
+  video.seeking = true
+  surface.dispatchEvent(pointerEvent('pointerdown', { pointerId: 5, clientX: 100 }))
+  surface.dispatchEvent(pointerEvent('pointermove', { pointerId: 5, clientX: 160 }))
+  assert.equal(video.timeWrites, writesAfterInitialisation)
+  assert.equal(queuedFrames.length, 0)
+
+  video.seeking = false
+  video.dispatchEvent(new Event('seeked'))
+  assert.equal(queuedFrames.length, 1)
+  queuedFrames.shift()()
+
+  assert.equal(video.currentTime, 16)
+  assert.equal(video.timeWrites, writesAfterInitialisation + 1)
+  controller.destroy()
+})
+
 test('exposes a media error state without throwing', () => {
   const video = new FakeVideo()
   const surface = new FakeSurface()
-  const controller = createScrubController({ video, surface })
+  const controller = createScrubController({ video, surface, scheduleFrame: immediateFrame })
 
   video.dispatchEvent(new Event('error'))
 

@@ -16,6 +16,7 @@ async function expectReadyExperience(page, screenshotName) {
   await expect(page.locator('.intro')).toHaveCount(0)
 
   await expect(page.locator('.experience')).toBeVisible()
+  await expect(page.locator('#nasze-przyklady')).toBeVisible()
   await expect(page.locator('#nasz-wklad')).toBeVisible()
   await expect(page.locator('#poparcie-naukowe')).toBeVisible()
 
@@ -142,11 +143,26 @@ test('hands off when the local film cannot play', async ({ page }) => {
 test('renders the interactive page at a desktop viewport', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await expectReadyExperience(page, 'experience-desktop.png')
+
+  expect(
+    await page.locator('.experience-content > section').evaluateAll((sections) =>
+      sections.map((section) => section.id),
+    ),
+  ).toEqual(['nasze-przyklady', 'nasz-wklad', 'poparcie-naukowe'])
+  await expect(page.locator('#nasz-wklad')).toContainText('Widok operatora dronu')
 })
 
 test('renders the interactive page without overflow at a mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await expectReadyExperience(page, 'experience-mobile.png')
+
+  const cards = await page.locator('#nasze-przyklady .example-card').evaluateAll((elements) =>
+    elements.map((element) => {
+      const rect = element.getBoundingClientRect()
+      return { top: rect.top, bottom: rect.bottom }
+    }),
+  )
+  expect(cards[1].top).toBeGreaterThan(cards[0].bottom)
 })
 
 test('keeps the main film paused at its midpoint and scrubs it by dragging', async ({ page }) => {
@@ -154,6 +170,9 @@ test('keeps the main film paused at its midpoint and scrubs it by dragging', asy
   const surface = page.locator('[data-scrub-surface]')
   const video = page.locator('[data-scrub-video]')
 
+  await expect(
+    page.getByRole('group', { name: /Interaktywny film.+Przeciągnij w prawo/i }),
+  ).toBeVisible()
   await expect(video).toHaveAttribute('src', '/video/film_2.mp4')
   await expect
     .poll(() =>
@@ -188,11 +207,11 @@ test('keeps the main film paused at its midpoint and scrubs it by dragging', asy
 
 test('shows text placeholders for example films that will be added later', async ({ page }) => {
   await skipIntro(page)
-  await expect(page.locator('.example-card__placeholder')).toHaveCount(2)
-  await expect(page.locator('.example-card__placeholder').first()).toContainText(
+  await expect(page.locator('#nasze-przyklady .example-card__placeholder')).toHaveCount(2)
+  await expect(page.locator('#nasze-przyklady .example-card__placeholder').first()).toContainText(
     'Film przykładowy zostanie dodany później',
   )
-  await expect(page.getByText('Tu będzie opis', { exact: true })).toHaveCount(3)
+  await expect(page.getByText('Tu będzie opis', { exact: true })).toHaveCount(4)
 })
 
 test('keeps the page usable when the interactive film fails', async ({ page }) => {

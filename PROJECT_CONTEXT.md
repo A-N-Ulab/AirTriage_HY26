@@ -14,7 +14,7 @@ stronę projektu. Strona jest ładowana dynamicznie w tle podczas intro.
 | --- | --- | --- |
 | Logo | `src/intro/logo-stage.js` | Znak AirTriage jest wyśrodkowany na kremowym tle przez 2000 ms. |
 | Film intro | `src/intro/video-stage.js`, `src/intro/index.js` | Film startuje od początku po logo, nie ma kontrolek i pozostaje widoczny aż do `ended`. Escape pomija film, a błąd lub 30 sekund bez postępu uruchamia handoff. |
-| Strona | `src/experience/` | Przewijalna strona z zakładkami-sekcjami, interaktywnym filmem i treścią projektu. |
+| Strona | `src/experience/` | Przewijalna strona: najpierw `Nasze przykłady`, potem `Nasz wkład` z interaktywnym filmem „Widok operatora dronu”, a dalej `Poparcie naukowe`. |
 
 Timeline intro pozostaje niezależną od DOM maszyną stanów:
 `idle → logo → video → handoff → done`.
@@ -55,7 +55,9 @@ public/CNAME                            # domena produkcyjna
 załadowaniu metadanych jest zatrzymywany dokładnie w połowie. Gest poziomy
 mapuje szerokość powierzchni na cały czas filmu: przeciągnięcie w prawo
 przesuwa do przodu, a w lewo cofa. Czas jest ograniczany do zakresu od zera do
-końca filmu. Pointer Events obsługują mysz, dotyk i pióro.
+końca filmu. Pointer Events obsługują mysz, dotyk i pióro. Szybkie zdarzenia
+ruchu są łączone do najnowszej pozycji, a kolejny seek czeka na zakończenie
+poprzedniego, żeby nie przeciążać dekodera.
 
 Brak filmu nie blokuje strony: widoczny jest komunikat zastępczy, a sekcje
 `Nasz wkład` i `Poparcie naukowe` pozostają dostępne. Dwa filmy przykładów nie

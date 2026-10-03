@@ -4,50 +4,21 @@ import { createScrubController } from './scrub-video.js'
 const pageMarkup = `
   <article class="experience">
     <header class="experience-header">
-      <a class="experience-header__brand" href="#film-interaktywny" aria-label="AirTriage — początek strony">
+      <a class="experience-header__brand" href="#nasze-przyklady" aria-label="AirTriage — początek strony">
         <img src="/brand/airtriage-logo.svg" alt="AirTriage" />
       </a>
       <nav class="experience-tabs" aria-label="Sekcje strony">
-        <a href="#film-interaktywny">Film</a>
+        <a href="#nasze-przyklady">Nasze przykłady</a>
         <a href="#nasz-wklad">Nasz wkład</a>
         <a href="#poparcie-naukowe">Poparcie naukowe</a>
       </nav>
     </header>
 
-    <main>
-      <section class="experience-hero" id="film-interaktywny" aria-label="Interaktywny film terenu">
-        <div
-          class="scrub-film"
-          data-scrub-surface
-          data-media-state="loading"
-          data-dragging="false"
-          aria-label="Interaktywny film. Przeciągnij w prawo, aby przesunąć film do przodu, lub w lewo, aby go cofnąć."
-        >
-          <video
-            class="scrub-film__video"
-            data-scrub-video
-            src="/video/film_2.mp4"
-            preload="auto"
-            muted
-            playsinline
-            draggable="false"
-          ></video>
-          <div class="scrub-film__veil" aria-hidden="true"></div>
-          <p class="scrub-film__hint">
-            <span aria-hidden="true">←</span>
-            Przeciągnij, aby obrócić
-            <span aria-hidden="true">→</span>
-          </p>
-          <p class="scrub-film__fallback" role="status">
-            Interaktywny film jest chwilowo niedostępny.
-          </p>
-        </div>
-      </section>
-
-      <section class="content-section" id="nasz-wklad">
+    <div class="experience-content">
+      <section class="content-section content-section--examples" id="nasze-przyklady">
         <div class="section-heading">
           <p class="section-heading__index" aria-hidden="true">01</p>
-          <h1>Nasz wkład</h1>
+          <h1>Nasze przykłady</h1>
         </div>
 
         <div class="example-grid">
@@ -81,9 +52,50 @@ const pageMarkup = `
         </div>
       </section>
 
-      <section class="content-section content-section--science" id="poparcie-naukowe">
+      <section class="content-section content-section--contribution" id="nasz-wklad">
         <div class="section-heading">
           <p class="section-heading__index" aria-hidden="true">02</p>
+          <h2>Nasz wkład</h2>
+        </div>
+
+        <div class="contribution-body">
+          <div
+            class="scrub-film"
+            data-scrub-surface
+            data-media-state="loading"
+            data-dragging="false"
+            role="group"
+            aria-label="Interaktywny film. Przeciągnij w prawo, aby przesunąć film do przodu, lub w lewo, aby go cofnąć."
+          >
+            <video
+              class="scrub-film__video"
+              data-scrub-video
+              src="/video/film_2.mp4"
+              preload="auto"
+              muted
+              playsinline
+              draggable="false"
+            ></video>
+            <div class="scrub-film__veil" aria-hidden="true"></div>
+            <p class="scrub-film__hint">
+              <span aria-hidden="true">←</span>
+              Przeciągnij, aby obrócić
+              <span aria-hidden="true">→</span>
+            </p>
+            <p class="scrub-film__fallback" role="status">
+              Interaktywny film jest chwilowo niedostępny.
+            </p>
+          </div>
+          <div class="contribution-caption">
+            <p class="contribution-caption__label">Widok operatora dronu</p>
+            <p>Tu będzie opis</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section content-section--science" id="poparcie-naukowe">
+        <div class="section-heading">
+          <p class="section-heading__index" aria-hidden="true">03</p>
           <h2>Poparcie naukowe</h2>
         </div>
         <div class="science-copy">
@@ -91,7 +103,7 @@ const pageMarkup = `
           <p>Tu będzie opis</p>
         </div>
       </section>
-    </main>
+    </div>
 
     <footer class="experience-footer">
       <img src="/brand/airtriage-logo.svg" alt="AirTriage" />

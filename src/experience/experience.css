@@ -72,11 +72,6 @@
   outline-offset: 5px;
 }
 
-.experience-hero {
-  padding: clamp(1rem, 3vw, 2.5rem) clamp(1rem, 4vw, 4rem) 0;
-  scroll-margin-top: 92px;
-}
-
 .scrub-film {
   position: relative;
   width: 100%;
@@ -168,6 +163,16 @@
   scroll-margin-top: 72px;
 }
 
+.content-section--examples {
+  padding-top: clamp(4rem, 8vw, 7rem);
+}
+
+.content-section--contribution {
+  padding-top: clamp(4rem, 8vw, 7rem);
+  background: rgba(255, 250, 242, 0.42);
+  border-top: 1px solid var(--primary-a12);
+}
+
 .section-heading {
   display: grid;
   grid-template-columns: minmax(32px, 0.14fr) 1fr;
@@ -250,6 +255,28 @@
   color: var(--primary) !important;
 }
 
+.contribution-body {
+  margin-left: calc(14% + clamp(0.75rem, 2vw, 2rem));
+}
+
+.contribution-caption {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.35fr) 1fr;
+  gap: clamp(1rem, 3vw, 3rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--primary-a12);
+}
+
+.contribution-caption p {
+  margin: 0;
+  color: var(--secondary);
+}
+
+.contribution-caption__label {
+  color: var(--primary) !important;
+  font-weight: 600;
+}
+
 .content-section--science {
   padding-top: clamp(4rem, 8vw, 7rem);
   background: var(--primary);
@@ -297,14 +324,15 @@
 
 @media (max-width: 760px) {
   .experience-header {
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: stretch;
     gap: 0.85rem;
     min-height: auto;
     padding-block: 0.85rem;
   }
 
   .experience-tabs {
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: 0.8rem;
   }
 
@@ -313,20 +341,13 @@
     letter-spacing: 0.04em;
   }
 
-  .experience-tabs a:first-child {
-    display: none;
-  }
-
-  .experience-hero {
-    padding-inline: 0.65rem;
-  }
-
   .scrub-film {
     aspect-ratio: 4 / 3;
   }
 
   .section-heading,
   .example-grid,
+  .contribution-body,
   .science-copy {
     margin-left: 0;
   }
@@ -338,6 +359,11 @@
 
   .science-copy {
     grid-template-columns: 1fr;
+  }
+
+  .contribution-caption {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
 }
 

@@ -17,13 +17,15 @@
 - Horizontal dragging is the only film manipulation: right advances, left rewinds.
 - All description copy is exactly `Tu będzie opis`.
 - Missing example films render readable text placeholders.
+- `Nasze przykłady` comes first; `Nasz wkład` follows with the interactive film captioned `Widok operatora dronu`.
+- Rapid pointer moves are coalesced so the video receives at most one queued seek at a time.
 - Preserve the cream and forest-green AirTriage identity.
 
 ## Review Focus
 
 - Film metadata may arrive after page construction; midpoint seeking must happen on metadata readiness.
 - A drag can exceed either edge; calculated time must stay between zero and duration.
-- Touch dragging must not scroll the film surface or leave a stuck dragging state after cancellation.
+- Touch dragging must not scroll the film surface, flood the decoder with overlapping seeks, or leave a stuck dragging state after cancellation.
 - A failed `film_2.mp4` must reveal fallback copy while the remaining page stays usable.
 - The two example cards must stack without horizontal overflow on narrow screens.
 
@@ -85,4 +87,3 @@
 - [ ] **Step 3: Commit the implementation** without adding the reference image unless intentionally required at runtime.
 - [ ] **Step 4: Push `main` to `origin`** and monitor the publication workflow to completion.
 - [ ] **Step 5: Verify the live URL returns successfully.**
-
