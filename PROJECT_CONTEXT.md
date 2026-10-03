@@ -1,6 +1,6 @@
 # AirTriage — kontekst projektu
 
-Stan opisany na: 2026-10-03.
+Stan opisany na: 2026-10-04.
 
 ## Co to jest
 
@@ -14,7 +14,7 @@ stronę projektu. Strona jest ładowana dynamicznie w tle podczas intro.
 | --- | --- | --- |
 | Logo | `src/intro/logo-stage.js` | Znak AirTriage jest wyśrodkowany na kremowym tle przez 2000 ms. |
 | Film intro | `src/intro/video-stage.js`, `src/intro/index.js` | Film startuje od początku po logo, nie ma kontrolek i pozostaje widoczny aż do `ended`. Escape pomija film, a błąd lub 30 sekund bez postępu uruchamia handoff. |
-| Strona | `src/experience/` | Przewijalna strona: najpierw `Nasze przykłady`, potem `Widok operatora` z interaktywnym filmem, a dalej `Algorytm i podstawa naukowa`. |
+| Strona | `src/experience/` | Przewijalna strona: najpierw `Nasze przykłady`, potem `Widok operatora` z interaktywnym panelem czterech osób, a dalej zwięzły `Algorytm` i `Poparcie naukowe`. |
 
 Timeline intro pozostaje niezależną od DOM maszyną stanów:
 `idle → logo → video → handoff → done`.
@@ -31,8 +31,13 @@ src/intro/timeline.js                   # stany i czasy intro
 src/experience/index.js                 # struktura strony i lifecycle
 src/experience/scrub-video.js           # sterowanie filmem przez przeciąganie
 src/experience/experience.css           # responsywny wygląd strony
+src/experience/operator-scenario.json   # statyczne dane 4 osób dla każdej klatki
+src/experience/operator-overlay.js      # synchronizacja panelu i oznaczeń SVG
+src/experience/operator-overlay.css     # panel A3 na desktopie i mobile
+tools/operator-tracking/                # offline tracking i budowa scenariusza
 public/video/RYSY_demo_20s_dopracowany.mp4 # film intro
 public/video/film_2.mp4                 # interaktywny film strony
+public/operator/*.webp                  # 4 poglądowe przybliżenia osób
 public/brand/airtriage-logo.svg         # produkcyjne logo
 public/CNAME                            # domena produkcyjna
 .github/workflows/deploy-pages.yml      # build i publikacja GitHub Pages
@@ -62,10 +67,27 @@ początku pliku i klatkami kluczowymi co 200 ms, dzięki czemu przeglądarka nie
 musi dekodować wielosekundowych fragmentów przy każdym przeciągnięciu.
 
 Brak filmu nie blokuje strony: widoczny jest komunikat zastępczy, a sekcje
-`Widok operatora` i `Algorytm i podstawa naukowa` pozostają dostępne. Sekcja
-naukowa zawiera semantyczny schemat HTML, progi HR/RR, ograniczenia POC oraz
+`Widok operatora` i `Algorytm` pozostają dostępne. Sekcja naukowa zawiera
+semantyczny schemat HTML, progi HR/RR, ograniczenia POC oraz
 linki do czterech źródeł. Dwa filmy przykładów nie zostały jeszcze dostarczone,
 dlatego ich karty pokazują tekst alternatywny.
+
+## Widok operatora
+
+Na filmie działa przygotowany wcześniej, interaktywny scenariusz dla dokładnie
+czterech wskazanych osób. `operator-scenario.json` przechowuje ich pozycje dla
+każdej klatki, a `operator-overlay.js` synchronizuje zaznaczenie w panelu z
+prostokątem lub punktem SVG na filmie. Kliknięcie działa w obu kierunkach:
+karta wybiera oznaczenie, a oznaczenie rozwija kartę. Tracking jest wykonywany
+offline przez narzędzia w `tools/operator-tracking/`; przeglądarka niczego nie
+wykrywa ani nie wylicza na bieżąco.
+
+Panel używa czterech poglądowych przybliżeń WebP oraz statycznych parametrów HR,
+RR, priorytetu i opisu stanu. Są to dane demonstracyjne POC, a przybliżenia nie
+służą do potwierdzania tożsamości. Osoba w żółtym stroju jest pierwsza i ma
+scenariusz wyraźnego zmęczenia oraz podwyższonego tętna. Osobny CSS tworzy wąski,
+półprzezroczysty panel po lewej na desktopie i dolny arkusz na urządzeniach
+mobilnych.
 
 ## Development lokalny
 

@@ -12,7 +12,7 @@ const pageMarkup = `
       <nav class="experience-tabs" aria-label="Sekcje strony">
         <a href="#nasze-przyklady">Nasze przykłady</a>
         <a href="#nasz-wklad">Widok operatora</a>
-        <a href="#algorytm-i-podstawa-naukowa">Algorytm i podstawa naukowa</a>
+        <a href="#algorytm-i-podstawa-naukowa">Algorytm</a>
       </nav>
     </header>
 
@@ -115,7 +115,7 @@ const pageMarkup = `
       >
         <div class="section-heading">
           <p class="section-heading__index" aria-hidden="true">03</p>
-          <h2>Algorytm i podstawa naukowa</h2>
+          <h2>Algorytm</h2>
         </div>
 
         <div class="science-content">
@@ -189,7 +189,7 @@ const pageMarkup = `
           <div class="evidence-section">
             <div class="evidence-section__heading">
               <p>Podstawa naukowa</p>
-              <h3>Co pochodzi z badań, a co jest decyzją POC</h3>
+              <h3>Poparcie naukowe</h3>
             </div>
 
             <div class="evidence-grid">

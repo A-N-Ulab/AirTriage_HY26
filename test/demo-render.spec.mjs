@@ -154,10 +154,16 @@ test('renders the interactive page at a desktop viewport', async ({ page }) => {
 })
 
 test('presents the algorithm and evidence as structured HTML', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
   await skipIntro(page)
 
   const science = page.locator('#algorytm-i-podstawa-naukowa')
-  await expect(science.getByRole('heading', { name: 'Algorytm i podstawa naukowa' })).toBeVisible()
+  await expect(page.locator('.experience-tabs a[href="#algorytm-i-podstawa-naukowa"]')).toHaveText(
+    'Algorytm',
+  )
+  await expect(science.getByRole('heading', { name: 'Algorytm', exact: true })).toBeVisible()
+  await expect(science.getByRole('heading', { name: 'Poparcie naukowe', exact: true })).toBeVisible()
+  await expect(science).not.toContainText('Co pochodzi z badań, a co jest decyzją POC')
   await expect(science.locator('.algorithm-flow > li')).toHaveCount(3)
   expect(
     await science
@@ -167,7 +173,27 @@ test('presents the algorithm and evidence as structured HTML', async ({ page }) 
   await expect(science.locator('.algorithm-outcome')).toHaveCount(3)
   await expect(science.locator('.evidence-source')).toHaveCount(4)
   await expect(science).toContainText('Czerwony ma pierwszeństwo przed żółtym i zielonym')
+  await expect(science).toContainText('HR ≤40 lub ≥131/min')
+  await expect(science).toContainText('RR ≤8 lub ≥25/min')
+  await expect(science).toContainText('HR 41–50 / 91–130')
+  await expect(science).toContainText('RR 9–11 / 21–24')
+  await expect(science).toContainText('HR 51–90/min')
+  await expect(science).toContainText('RR 12–20/min')
   await expect(science).toContainText('nie zastępuje decyzji ratownika')
+
+  const compactness = await science.evaluate((element) => ({
+    paddingTop: Number.parseFloat(getComputedStyle(element).paddingTop),
+    titleSize: Number.parseFloat(
+      getComputedStyle(element.querySelector('.section-heading h2')).fontSize,
+    ),
+    evidenceGap: Number.parseFloat(
+      getComputedStyle(element.querySelector('.evidence-section')).marginTop,
+    ),
+  }))
+  expect(compactness.paddingTop).toBeLessThanOrEqual(80)
+  expect(compactness.titleSize).toBeLessThanOrEqual(76)
+  expect(compactness.evidenceGap).toBeLessThanOrEqual(96)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1440)
 })
 
 test('renders the interactive page without overflow at a mobile viewport', async ({ page }) => {
