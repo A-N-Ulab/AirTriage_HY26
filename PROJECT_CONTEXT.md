@@ -17,7 +17,7 @@ Demo jest ładowane dynamicznie w tle, więc Three.js nie opóźnia logo ani fil
 | Etap | Implementacja | Zachowanie |
 | --- | --- | --- |
 | 1. Logo | `src/intro/logo-stage.js`, `src/intro/logo-stage.css` | Przezroczyste SVG jest wyświetlane przez dokładnie 2000 ms na tle strony (`--bg`, krem `#fef2e4`). Znak jest wyśrodkowany i ma ograniczoną szerokość oraz wysokość, więc nigdy nie wychodzi poza viewport. Następnie znika w szybkim fade 300 ms. |
-| 2. Film | `src/intro/video-stage.js`, `src/intro/video-stage.css`, `src/intro/index.js` | Wideo YouTube jest przygotowywane za logo, potem widoczne przez 4000 ms. Brak widocznych kontrolek; `Escape` przewija do handoff, a guard autoplay w `timeline.js` zawsze domyka intro. |
+| 2. Film | `src/intro/video-stage.js`, `src/intro/video-stage.css`, `src/intro/index.js` | Lokalny film jest przygotowywany za logo, potem widoczny przez 4000 ms. Nie ma elementów sterujących; Escape przechodzi do kolejnego etapu. |
 | 3. Demo | `src/demo/`, `src/demo-loader.js` | Lazy-loadowane demo Three.js. Przy wolnym ładowaniu widać postęp, a przy błędzie komunikat i Retry. |
 
 Przejście film → demo trwa 600 ms i jest traktowane jako przejście, nie jako
@@ -30,7 +30,7 @@ czwarty etap. `src/intro/timeline.js` jest niezależną od DOM maszyną czasu:
 index.html                              # statyczna powłoka i fallback bez JavaScript
 src/main.js                             # jedyny koordynator intro i ładowania demo
 src/style.css                           # wspólna powłoka, loader i błędy
-src/intro/index.js                      # składa logo i film, obsługuje YouTube
+src/intro/index.js                      # składa logo i lokalny film
 src/intro/timeline.js                   # czasy oraz przejścia intro, bez DOM
 src/intro/logo-stage.js                 # DOM wyłącznie etapu logo
 src/intro/logo-stage.css                # wyśrodkowany znak i fade logo
@@ -131,12 +131,11 @@ Ważne elementy konfiguracji:
 
 ## Zewnętrzne zależności runtime
 
-- Film jest osadzony z `youtube-nocookie.com`; repozytorium go nie przechowuje.
+- Film jest przechowywany w `public/video/` i odtwarzany bez elementów sterujących.
 - Inter ładuje się z Google Fonts.
 - Three.js jest osobnym, dynamicznym chunkiem Vite.
-- Brak filmu, blokada autoplay lub problem WebGL nie może pozostawić pustej strony:
-  blokadę autoplay obsługuje guard w `timeline.js`, który wpuszcza intro do końca, a
-  problem WebGL pokazuje ekran błędu z Retry.
+- Brak filmu lub problem WebGL nie może pozostawić pustej strony: timeline intro
+  przechodzi dalej automatycznie, a błąd demo pokazuje ekran z Retry.
 
 ## Zasada aktualizacji tego pliku
 

@@ -31,7 +31,7 @@ src/
 |   |-- logo-stage.css      # centred mark and fast crossfade
 |   |-- video-stage.js      # film-only DOM
 |   |-- video-stage.css     # film visibility and crossfade
-|   `-- intro.css           # shared film controls and handoff presentation
+|   `-- intro.css           # shared film and handoff presentation
 `-- demo/
     |-- index.js            # public createDemo API and Three.js runtime
     |-- terrain.js          # deterministic terrain geometry and colors
@@ -56,14 +56,12 @@ the demo remains an independent lazy-loaded bundle.
 | Stage | Duration | What happens |
 | --- | --- | --- |
 | `logo` | 2000 ms | The exact transparent SVG mark sits centred on the cream background |
-| `video` | 4000 ms | A 300 ms crossfade reveals muted drone footage and the mark |
+| `video` | 4000 ms | A 300 ms crossfade reveals muted local drone footage and the mark |
 | `demo` | ongoing | The terrain or its loading/error surface takes over |
 
 The film-to-demo handoff lasts 600 ms and is a transition rather than another stage.
 
-The film is a muted `youtube-nocookie.com` embed with no visible controls. `Escape`
-jumps to the handoff. If autoplay is blocked the intro still completes on its own after
-a short guard, so the visitor is never trapped.
+The film is a muted local MP4 without playback controls. `Escape` jumps to the handoff.
 
 The production mark is `public/brand/airtriage-logo.svg`. It contains vector paths and
 no background or embedded raster. The supplied JPG is retained only as
@@ -145,5 +143,4 @@ Inter loads from Google Fonts. HK Modular is a paid Hanken Design Co font; the C
 a local copy when present and falls back to Inter. Licensed font files can be placed in
 `public/fonts/` and referenced by the existing `@font-face` declaration.
 
-The intro film remains hosted by its original YouTube uploader and is streamed rather
-than redistributed by this repository.
+The intro film is served locally from `public/video/`.

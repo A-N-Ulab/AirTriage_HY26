@@ -2,11 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test.describe.configure({ mode: 'serial' })
 
-const blockVideo = (page) =>
-  page.route(/(?:youtube(?:-nocookie)?\.com|ytimg\.com)/, (route) => route.abort())
-
 async function skipIntro(page) {
-  await blockVideo(page)
   await page.goto('/')
   await expect(page.locator('.intro')).toBeAttached()
   await page.keyboard.press('Escape')
@@ -36,7 +32,6 @@ async function expectReadyTerrain(page, screenshotName) {
 }
 
 test('shows the standalone logo stage on the page background before crossfading to the film', async ({ page }) => {
-  await blockVideo(page)
   await page.goto('/')
 
   const intro = page.locator('.intro')
@@ -58,7 +53,6 @@ test('shows the standalone logo stage on the page background before crossfading 
 })
 
 test('centres the logo mark without clipping it at any viewport', async ({ page }) => {
-  await blockVideo(page)
   // This check only looks at the splash. Block the demo chunk so the repeated
   // viewports never spin up a WebGL context and starve the tests that follow.
   await page.route('**/assets/demo-*.js', (route) => route.abort())
@@ -97,6 +91,38 @@ test('centres the logo mark without clipping it at any viewport', async ({ page 
     expect(offsetX, 'not horizontally centred at ' + label).toBeLessThanOrEqual(1)
     expect(offsetY, 'not vertically centred at ' + label).toBeLessThanOrEqual(1)
   }
+})
+
+test('plays the local film without controls and keeps the AirTriage lockup', async ({ page }) => {
+  const filmResponse = page.waitForResponse(
+    (response) =>
+      response.url().endsWith('/video/RYSY_demo_20s_dopracowany.mp4') && response.ok(),
+  )
+  await page.goto('/')
+  await filmResponse
+
+  const intro = page.locator('.intro')
+  const video = page.locator('.intro__video')
+  await expect(video).toBeAttached()
+  await expect(video).toHaveAttribute('src', '/video/RYSY_demo_20s_dopracowany.mp4')
+  expect(
+    await video.evaluate((element) => ({
+      autoplay: element.autoplay,
+      controls: element.controls,
+      muted: element.muted,
+      playsInline: element.playsInline,
+    })),
+  ).toEqual({ autoplay: true, controls: false, muted: true, playsInline: true })
+  await expect.poll(() => video.evaluate((element) => element.videoWidth)).toBeGreaterThan(0)
+  await expect.poll(() => video.evaluate((element) => element.currentTime)).toBeGreaterThan(0)
+
+  await expect(page.locator('.intro__skip, .intro__tap, .intro__progress')).toHaveCount(0)
+  await expect(intro).toHaveAttribute('data-phase', 'video', { timeout: 2500 })
+  await expect(page.locator('.intro__lockup-logo')).toBeVisible()
+  await expect(page.locator('.intro__lockup-logo')).toHaveAttribute(
+    'src',
+    '/brand/airtriage-logo.svg',
+  )
 })
 
 test('renders the terrain at a desktop viewport', async ({ page }) => {

@@ -10,15 +10,15 @@ export function createVideoStage({ logoUrl = '' } = {}) {
   stage.innerHTML = `
     <div class="intro__media" aria-hidden="true">
       <div class="intro__drift">
-        <iframe
-          class="intro__iframe"
-          title="Drone footage over the Tatra mountains"
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowfullscreen
-          tabindex="-1"
-        ></iframe>
+        <video
+          class="intro__video"
+          src="/video/RYSY_demo_20s_dopracowany.mp4"
+          autoplay
+          muted
+          playsinline
+          preload="auto"
+        ></video>
       </div>
-      <div class="intro__shield"></div>
     </div>
 
     <div class="intro__scrim" aria-hidden="true"></div>
@@ -33,9 +33,6 @@ export function createVideoStage({ logoUrl = '' } = {}) {
       />
     </div>
 
-    <div class="intro__progress" role="presentation">
-      <i class="intro__progress-bar"></i>
-    </div>
   `
   return stage
 }
