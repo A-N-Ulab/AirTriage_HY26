@@ -1,4 +1,5 @@
 import './experience.css'
+import './operator-overlay.css'
 import { createOperatorOverlay, loadOperatorScenario } from './operator-overlay.js'
 import { createScrubController } from './scrub-video.js'
 
@@ -97,6 +98,12 @@ const pageMarkup = `
             <p>
               Przeciągnij obraz w poziomie, aby prześledzić nagranie klatka po klatce
               z perspektywy operatora dronu.
+            </p>
+            <p class="contribution-caption__disclaimer">
+              Widok celowo prezentuje cztery wybrane osoby z większej grupy, aby czytelnie
+              pokazać mechanizm oznaczania, wyboru i rozwijania danych w panelu operatora.
+              Przybliżenia i parametry są przygotowanym scenariuszem demonstracyjnym POC;
+              nie stanowią pomiaru na żywo ani materiału do potwierdzania tożsamości.
             </p>
           </div>
         </div>

@@ -262,6 +262,76 @@ test('selects the same one of four people from panel and film', async ({ page })
   )
 })
 
+test('operator layout keeps the A3 rail and tracking layer aligned with the desktop film', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await skipIntro(page)
+
+  const surface = page.locator('[data-scrub-surface]')
+  const video = page.locator('[data-scrub-video]')
+  const overlay = page.locator('[data-operator-overlay]')
+  const tracking = page.locator('[data-operator-tracking]')
+  const panel = page.locator('[data-operator-panel]')
+
+  await surface.scrollIntoViewIfNeeded()
+  const [surfaceBox, videoBox, overlayBox, trackingBox, panelBox] = await Promise.all([
+    surface.boundingBox(),
+    video.boundingBox(),
+    overlay.boundingBox(),
+    tracking.boundingBox(),
+    panel.boundingBox(),
+  ])
+
+  for (const candidate of [videoBox, overlayBox, trackingBox]) {
+    expect(Math.abs(candidate.x - surfaceBox.x)).toBeLessThanOrEqual(1)
+    expect(Math.abs(candidate.y - surfaceBox.y)).toBeLessThanOrEqual(1)
+    expect(Math.abs(candidate.width - surfaceBox.width)).toBeLessThanOrEqual(1)
+    expect(Math.abs(candidate.height - surfaceBox.height)).toBeLessThanOrEqual(1)
+  }
+  expect(panelBox.width).toBeGreaterThanOrEqual(184)
+  expect(panelBox.width).toBeLessThanOrEqual(252)
+  expect(panelBox.x - surfaceBox.x).toBeGreaterThanOrEqual(12)
+  expect(panelBox.x - surfaceBox.x).toBeLessThanOrEqual(48)
+  await expect(page.locator('[data-person-card]')).toHaveCount(4)
+  for (const card of await page.locator('[data-person-card]').all()) await expect(card).toBeVisible()
+})
+
+test('mobile operator layout uses a compact bottom sheet and accessible film targets', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await skipIntro(page)
+
+  const surface = page.locator('[data-scrub-surface]')
+  const panel = page.locator('[data-operator-panel]')
+  await surface.scrollIntoViewIfNeeded()
+  const [surfaceBox, panelBox] = await Promise.all([surface.boundingBox(), panel.boundingBox()])
+
+  expect(panelBox.y).toBeGreaterThan(surfaceBox.y + surfaceBox.height * 0.54)
+  expect(panelBox.height).toBeLessThan(surfaceBox.height * 0.44)
+  expect(panelBox.x).toBeGreaterThanOrEqual(surfaceBox.x)
+  expect(panelBox.x + panelBox.width).toBeLessThanOrEqual(surfaceBox.x + surfaceBox.width + 1)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+
+  const targetBox = await page.locator('[data-person-target]').first().boundingBox()
+  expect(targetBox.width).toBeGreaterThanOrEqual(44)
+  expect(targetBox.height).toBeGreaterThanOrEqual(44)
+  await expect(page.locator('.contribution-caption')).toContainText('cztery wybrane osoby')
+  await expect(page.locator('.contribution-caption')).toContainText('potwierdzania tożsamości')
+})
+
+test('reduced motion removes operator interface transitions', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await skipIntro(page)
+
+  expect(
+    await page
+      .locator('[data-person-card="person-01"]')
+      .evaluate((element) => getComputedStyle(element).transitionDuration),
+  ).toBe('0s')
+})
+
 test('operator controls support keyboard selection and outside-frame state', async ({ page }) => {
   await skipIntro(page)
 

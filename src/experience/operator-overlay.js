@@ -79,8 +79,8 @@ const personLayerMarkup = ({ person, box, selected }) => {
   const { x, y, width, height } = box
   const centreX = x + width / 2
   const centreY = y + height / 2
-  const targetWidth = Math.max(width + 36, 110)
-  const targetHeight = Math.max(height + 36, 110)
+  const targetWidth = Math.max(width + 36, 190)
+  const targetHeight = Math.max(height + 36, 190)
   const targetX = centreX - targetWidth / 2
   const targetY = centreY - targetHeight / 2
   const marker = selected
