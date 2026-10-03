@@ -1,0 +1,48 @@
+:root {
+  font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+  color: #f3f6ff;
+  background: radial-gradient(circle at top, #2d3f63 0%, #0d1526 48%, #060a14 100%);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+h1 {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(2.8rem, 7vw, 6.2rem);
+  letter-spacing: 0.1em;
+  text-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
+}
+
+#mountain-canvas {
+  width: min(90vw, 1100px);
+  height: min(70vh, 640px);
+  display: block;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(116, 157, 216, 0.32), rgba(5, 8, 18, 0.15));
+  box-shadow: 0 30px 45px rgba(0, 0, 0, 0.35);
+}
