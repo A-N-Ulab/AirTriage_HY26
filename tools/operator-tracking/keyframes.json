@@ -1,0 +1,64 @@
+{
+  "people": [
+    {
+      "id": "person-01",
+      "displayName": "Osoba 01",
+      "status": "yellow",
+      "statusLabel": "Priorytet żółty",
+      "heartRate": 118,
+      "respiratoryRate": 22,
+      "condition": "Bardzo zmęczona · pozycja siedząca",
+      "image": "/operator/person-01-yellow.webp",
+      "imageAlt": "Poglądowe przybliżenie siedzącej osoby 01"
+    },
+    {
+      "id": "person-02",
+      "displayName": "Osoba 02",
+      "status": "green",
+      "statusLabel": "Priorytet zielony",
+      "heartRate": 84,
+      "respiratoryRate": 16,
+      "condition": "Stan stabilny",
+      "image": "/operator/person-02-green.webp",
+      "imageAlt": "Poglądowe przybliżenie osoby 02 z czerwonym plecakiem"
+    },
+    {
+      "id": "person-03",
+      "displayName": "Osoba 03",
+      "status": "green",
+      "statusLabel": "Priorytet zielony",
+      "heartRate": 79,
+      "respiratoryRate": 15,
+      "condition": "Stan stabilny",
+      "image": "/operator/person-03-green.webp",
+      "imageAlt": "Poglądowe przybliżenie osoby 03 z fioletowym plecakiem"
+    },
+    {
+      "id": "person-04",
+      "displayName": "Osoba 04",
+      "status": "green",
+      "statusLabel": "Priorytet zielony",
+      "heartRate": 88,
+      "respiratoryRate": 18,
+      "condition": "Stan stabilny",
+      "image": "/operator/person-04-green.webp",
+      "imageAlt": "Poglądowe przybliżenie osoby 04 w turkusowej koszulce"
+    }
+  ],
+  "keyframes": {
+    "0": {"person-01": null, "person-02": null, "person-03": null, "person-04": null},
+    "69": {"person-01": null, "person-02": null, "person-03": null, "person-04": null},
+    "70": {"person-01": [1554, 135, 96, 101], "person-02": [1107, 118, 55, 109], "person-03": [1384, 82, 68, 139], "person-04": [1484, 86, 69, 135]},
+    "80": {"person-01": [1560, 158, 94, 105], "person-02": [1112, 159, 56, 107], "person-03": [1382, 112, 72, 142], "person-04": [1483, 119, 69, 136]},
+    "100": {"person-01": [1555, 271, 98, 99], "person-02": [1151, 229, 58, 111], "person-03": [1368, 208, 75, 139], "person-04": [1481, 226, 69, 137]},
+    "120": {"person-01": [1570, 316, 96, 98], "person-02": [1158, 257, 59, 112], "person-03": [1378, 248, 75, 137], "person-04": [1486, 279, 68, 135]},
+    "139": {"person-01": [1570, 371, 98, 104], "person-02": [1153, 307, 61, 110], "person-03": [1381, 305, 78, 132], "person-04": [1493, 346, 65, 132]},
+    "160": {"person-01": [1542, 473, 103, 102], "person-02": [1156, 346, 62, 116], "person-03": [1335, 366, 82, 136], "person-04": [1450, 408, 69, 137]},
+    "180": {"person-01": [1514, 533, 108, 100], "person-02": [1197, 392, 64, 118], "person-03": [1328, 405, 84, 138], "person-04": [1440, 455, 74, 139]},
+    "200": {"person-01": [1482, 591, 105, 95], "person-02": [1225, 423, 69, 120], "person-03": [1320, 450, 84, 139], "person-04": [1424, 509, 76, 145]},
+    "220": {"person-01": [1440, 623, 105, 94], "person-02": [1260, 448, 72, 123], "person-03": [1319, 455, 82, 138], "person-04": [1395, 518, 77, 142]},
+    "240": {"person-01": [1385, 618, 105, 96], "person-02": [1280, 483, 72, 126], "person-03": [1319, 487, 78, 136], "person-04": [1361, 535, 75, 140]},
+    "260": {"person-01": [1335, 626, 104, 94], "person-02": [1284, 485, 71, 126], "person-03": [1316, 488, 79, 136], "person-04": [1340, 536, 75, 139]},
+    "277": {"person-01": [1332, 625, 100, 94], "person-02": [1280, 487, 70, 124], "person-03": [1314, 489, 77, 134], "person-04": [1337, 535, 73, 137]}
+  }
+}
