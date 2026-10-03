@@ -11,6 +11,7 @@ const reducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export function playIntro({ revealTarget } = {}) {
+  document.documentElement.classList.add('intro-active')
   const overlay = document.createElement('div')
   overlay.className = 'intro'
   overlay.dataset.phase = PHASE.IDLE
@@ -64,6 +65,7 @@ export function playIntro({ revealTarget } = {}) {
     video.load()
     video.remove()
     overlay.remove()
+    document.documentElement.classList.remove('intro-active')
   }
 
   video.addEventListener('ended', onVideoFinished)

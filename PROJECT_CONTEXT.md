@@ -1,85 +1,65 @@
 # AirTriage — kontekst projektu
 
-Ten plik jest punktem startowym dla kolejnych rozmów i zmian. Najpierw przeczytaj
-jego, a dopiero potem otwieraj pliki związane z konkretnym zadaniem. Nie trzeba za
-każdym razem analizować całego repozytorium.
-
 Stan opisany na: 2026-10-03.
 
 ## Co to jest
 
-AirTriage to statyczna aplikacja typu single-page zbudowana przez Vite. Po wejściu
-użytkownik przechodzi przez trzy niezależne etapy: logo, film i demo terenu 3D.
-Demo jest ładowane dynamicznie w tle, więc Three.js nie opóźnia logo ani filmu.
+AirTriage to statyczna aplikacja single-page zbudowana przez Vite. Użytkownik
+najpierw widzi logo i lokalny film intro, a po jego zakończeniu przewijalną
+stronę projektu. Strona jest ładowana dynamicznie w tle podczas intro.
 
-## Trzy etapy doświadczenia
+## Etapy doświadczenia
 
 | Etap | Implementacja | Zachowanie |
 | --- | --- | --- |
-| 1. Logo | `src/intro/logo-stage.js`, `src/intro/logo-stage.css` | Przezroczyste SVG jest wyświetlane przez dokładnie 2000 ms na tle strony (`--bg`, krem `#fef2e4`). Znak jest wyśrodkowany i ma ograniczoną szerokość oraz wysokość, więc nigdy nie wychodzi poza viewport. Następnie znika w szybkim fade 300 ms. |
-| 2. Film | `src/intro/video-stage.js`, `src/intro/video-stage.css`, `src/intro/index.js` | Przy prawidłowym odtwarzaniu lokalny film startuje od początku po logo i pozostaje widoczny aż do zdarzenia `ended`. Nie ma elementów sterujących; Escape pomija film, a błąd lub 30 sekund bez postępu uruchamia handoff awaryjny. |
-| 3. Demo | `src/demo/`, `src/demo-loader.js` | Lazy-loadowane demo Three.js. Przy wolnym ładowaniu widać postęp, a przy błędzie komunikat i Retry. |
+| Logo | `src/intro/logo-stage.js` | Znak AirTriage jest wyśrodkowany na kremowym tle przez 2000 ms. |
+| Film intro | `src/intro/video-stage.js`, `src/intro/index.js` | Film startuje od początku po logo, nie ma kontrolek i pozostaje widoczny aż do `ended`. Escape pomija film, a błąd lub 30 sekund bez postępu uruchamia handoff. |
+| Strona | `src/experience/` | Przewijalna strona z zakładkami-sekcjami, interaktywnym filmem i treścią projektu. |
 
-Przejście film → demo trwa 600 ms i jest traktowane jako przejście, nie jako
-czwarty etap. `src/intro/timeline.js` jest niezależną od DOM maszyną czasu:
+Timeline intro pozostaje niezależną od DOM maszyną stanów:
 `idle → logo → video → handoff → done`.
 
 ## Najważniejsze pliki
 
 ```text
-index.html                              # statyczna powłoka i fallback bez JavaScript
-src/main.js                             # jedyny koordynator intro i ładowania demo
-src/style.css                           # wspólna powłoka, loader i błędy
-src/intro/index.js                      # składa logo i lokalny film
-src/intro/timeline.js                   # czasy oraz przejścia intro, bez DOM
-src/intro/logo-stage.js                 # DOM wyłącznie etapu logo
-src/intro/logo-stage.css                # wyśrodkowany znak i fade logo
-src/intro/video-stage.js                # DOM wyłącznie etapu filmu
-src/intro/video-stage.css               # widoczność filmu i crossfade
-src/intro/intro.css                     # kontrolki filmu i handoff
-src/demo-loader.js                      # load/ready/error/retry dla demo
-src/demo/index.js                       # publiczne createDemo i runtime Three.js
-src/demo/terrain.js                     # deterministyczna geometria terenu
-public/brand/airtriage-logo.svg         # produkcyjne logo wektorowe bez tła
-public/brand/favicon-square.svg         # kwadratowa ikona z kremową płytką
-public/brand/favicon.svg                # oryginalna szeroka ikona drona
-public/favicon-32.png                   # raster 32x32
-public/apple-touch-icon.png             # raster 180x180
-public/og-image.png                     # 1200x630 Open Graph / Twitter card
-docs/assets/airtriage-logo-reference.jpg # dostarczony raster referencyjny
+index.html                              # powłoka i fallback bez JavaScript
+src/main.js                             # koordynacja intro i lazy-load strony
+src/style.css                           # tokeny, powłoka, loading i błąd
+src/demo-loader.js                      # istniejący loader modułu po intro
+src/intro/index.js                      # logo, film intro i handoff
+src/intro/timeline.js                   # stany i czasy intro
+src/experience/index.js                 # struktura strony i lifecycle
+src/experience/scrub-video.js           # sterowanie filmem przez przeciąganie
+src/experience/experience.css           # responsywny wygląd strony
+public/video/RYSY_demo_20s_dopracowany.mp4 # film intro
+public/video/film_2.mp4                 # interaktywny film strony
+public/brand/airtriage-logo.svg         # produkcyjne logo
 public/CNAME                            # domena produkcyjna
-.github/workflows/deploy-pages.yml      # test, build i deployment
+.github/workflows/deploy-pages.yml      # build i publikacja GitHub Pages
 ```
 
 ## Granice modułów
 
-- Logo nie zna YouTube, filmu ani demo.
-- Film nie importuje logo ani demo.
-- Intro nie importuje Three.js ani plików z `src/demo/`.
-- `src/main.js` uruchamia intro i osobno wykonuje dynamiczny import
-  `src/demo/index.js` po pierwszej klatce/bezczynności przeglądarki.
-- Publiczny kontrakt demo to `createDemo({ container, onProgress })`, zwracający
-  kontroler `{ destroy() }` po pierwszej wyrenderowanej klatce.
+- Etapy logo i filmu intro nie importują siebie nawzajem.
+- Intro nie importuje `src/experience/`.
+- `src/main.js` wykonuje dynamiczny import `src/experience/index.js` po
+  pierwszej klatce lub w czasie bezczynności przeglądarki.
+- Publiczny kontrakt strony to
+  `createExperience({ container, onProgress })`, zwracający `{ destroy() }`.
+- `src/experience/scrub-video.js` nie zna struktury całej strony; otrzymuje
+  tylko element wideo oraz powierzchnię gestu.
 
-## Logo
+## Film interaktywny
 
-Produkcja korzysta wyłącznie z `public/brand/airtriage-logo.svg`. SVG zachowuje
-proporcje i kontury dostarczonego znaku 1024×411, składa się z wektorowych ścieżek
-i nie zawiera białego prostokąta ani osadzonego obrazu rastrowego. JPG w
-`docs/assets/` służy jedynie jako materiał referencyjny i nie jest pobierany przez
-stronę.
+`public/video/film_2.mp4` nie ma autoplay ani elementów sterujących. Po
+załadowaniu metadanych jest zatrzymywany dokładnie w połowie. Gest poziomy
+mapuje szerokość powierzchni na cały czas filmu: przeciągnięcie w prawo
+przesuwa do przodu, a w lewo cofa. Czas jest ograniczany do zakresu od zera do
+końca filmu. Pointer Events obsługują mysz, dotyk i pióro.
 
-Canvas SVG to dokładnie `viewBox="0 0 1024 411"`. Współrzędne ścieżki pozostają w
-układzie po eksporcie A4, a transform `translate(-162.859,-851.546) scale(6.68276)`
-mapuje prostokąt artwork (24.37 140.85 153.23 34.65) na wyśrodkowany canvas 1024×411.
-Nie zmieniaj `viewBox` bez aktualizacji `test/brand-logo.test.mjs`, który go pilnuje.
-
-Stage logo nie ustawia własnego tła — tło daje `.intro` przez `var(--bg)`. Dzięki temu
-splash i hand-off mają ten sam kolor.
-
-Ikony strony: `public/brand/favicon-square.svg` (kwadratowa, z kremową płytką
-`#fef2e4`, żeby znak był czytelny na ciemnym pasku przeglądarki), plus rastry
-`public/favicon-32.png` i `public/apple-touch-icon.png`.
+Brak filmu nie blokuje strony: widoczny jest komunikat zastępczy, a sekcje
+`Nasz wkład` i `Poparcie naukowe` pozostają dostępne. Dwa filmy przykładów nie
+zostały jeszcze dostarczone, dlatego ich karty pokazują tekst alternatywny.
 
 ## Development lokalny
 
@@ -95,49 +75,18 @@ Pełna weryfikacja:
 ```bash
 npm test
 npm run build
-npx playwright install chromium
 npm run preview
 npm run test:render
 ```
 
-`npm test` obejmuje timeline intro, SVG, granice modułów, loader i geometrię.
-`npm run test:render` sprawdza przebieg w prawdziwej przeglądarce, desktop/mobile,
-błędy ładowania i reduced motion.
+## Deployment
 
-## Deployment — gdzie i jak
+Produkcja działa pod <https://airtriage.anulab.tech/> jako GitHub Pages.
+Push do `main` uruchamia `.github/workflows/deploy-pages.yml`, który wykonuje
+`npm ci`, buduje `dist/` i publikuje artefakt. `public/CNAME` zawiera domenę,
+a Vite używa `base: '/'`.
 
-Produkcja działa pod adresem <https://airtriage.anulab.tech/> jako GitHub Pages.
+## Zasada aktualizacji
 
-Deployment jest automatyczny:
-
-1. Zmiany trafiają na branch `main` (zwykle przez merge/push).
-2. GitHub uruchamia `.github/workflows/deploy-pages.yml`.
-3. Job `build` sprawdza konfigurację domeny skryptem
-   `test/custom-domain.Tests.ps1`.
-4. Workflow instaluje Node.js 20, wykonuje `npm ci` i `npm run build`.
-5. Katalog `dist/` jest wysyłany jako artefakt GitHub Pages.
-6. Job `deploy` publikuje artefakt w środowisku `github-pages`.
-
-Workflow można też uruchomić ręcznie przez `workflow_dispatch` w zakładce Actions.
-Repo musi mieć GitHub Pages ustawione na źródło **GitHub Actions**.
-
-Ważne elementy konfiguracji:
-
-- `public/CNAME` zawiera `airtriage.anulab.tech` i trafia do `dist/CNAME`;
-- `vite.config.js` używa `base: '/'`, ponieważ aplikacja działa w korzeniu domeny;
-- nie należy ustawiać base na `/AirTriage_HY26/`, dopóki używana jest domena
-  niestandardowa;
-- sekrety nie są potrzebne — workflow korzysta z uprawnień GitHub Pages i OIDC.
-
-## Zewnętrzne zależności runtime
-
-- Film jest przechowywany w `public/video/` i odtwarzany bez elementów sterujących.
-- Inter ładuje się z Google Fonts.
-- Three.js jest osobnym, dynamicznym chunkiem Vite.
-- Brak filmu lub problem WebGL nie może pozostawić pustej strony: timeline intro
-  przechodzi dalej automatycznie, a błąd demo pokazuje ekran z Retry.
-
-## Zasada aktualizacji tego pliku
-
-Po zmianie architektury, etapów, domeny, workflow, głównych komend lub publicznych
-kontraktów należy zaktualizować ten dokument w tym samym zadaniu.
+Po zmianie etapów, głównych modułów, zasobów, domeny lub komend trzeba
+zaktualizować ten plik w tym samym zadaniu.

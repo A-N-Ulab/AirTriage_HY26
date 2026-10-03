@@ -72,15 +72,15 @@ body {
   flex: 1;
   min-width: 0;
   min-height: 100vh;
-  overflow: hidden;
+  overflow: visible;
   background:
     radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.9), transparent 42%),
     var(--bg);
 }
 
 .demo-shell__mount {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  min-height: 100vh;
 }
 
 .demo-shell__status {
@@ -97,6 +97,11 @@ body {
   background:
     radial-gradient(circle at 50% 36%, rgba(255, 252, 246, 0.96), rgba(244, 240, 224, 0.88) 48%, transparent 78%),
     linear-gradient(180deg, #dce8e7 0%, #eef0df 52%, #fef2e4 100%);
+}
+
+html.intro-active,
+html.intro-active body {
+  overflow: hidden;
 }
 
 .demo-shell__eyebrow,

@@ -38,7 +38,7 @@ test('keeps progress monotonic and becomes ready after the first frame', async (
   const loader = createDemoLoader({
     importDemo: async () => ({
       createDemo: async ({ onProgress }) => {
-        onProgress({ progress: 72, message: 'Preparing terrain...' })
+        onProgress({ progress: 72, message: 'Preparing content...' })
         onProgress({ progress: 60, message: 'Still preparing...' })
         return firstFrame.promise
       },
@@ -79,12 +79,12 @@ test('reports an import failure without rejecting the intro flow', async () => {
   assert.match(states.at(-1).error.message, /network unavailable/)
 })
 
-test('reports a scene initialization failure', async () => {
+test('reports an experience initialization failure', async () => {
   const states = []
   const loader = createDemoLoader({
     importDemo: async () => ({
       createDemo: async () => {
-        throw new Error('WebGL unavailable')
+        throw new Error('experience unavailable')
       },
     }),
     container: {},
@@ -93,10 +93,10 @@ test('reports a scene initialization failure', async () => {
 
   assert.equal(await loader.start(), null)
   assert.equal(states.at(-1).status, 'error')
-  assert.match(states.at(-1).error.message, /WebGL unavailable/)
+  assert.match(states.at(-1).error.message, /experience unavailable/)
 })
 
-test('reports a runtime WebGL failure after the demo becomes ready', async () => {
+test('reports a runtime failure after the experience becomes ready', async () => {
   const states = []
   let failRuntime
   const loader = createDemoLoader({
@@ -113,10 +113,25 @@ test('reports a runtime WebGL failure after the demo becomes ready', async () =>
   await loader.start()
   assert.equal(states.at(-1).status, 'ready')
 
-  failRuntime(new Error('WebGL context lost'))
+  failRuntime(new Error('experience runtime lost'))
 
   assert.equal(states.at(-1).status, 'error')
-  assert.match(states.at(-1).error.message, /context lost/i)
+  assert.match(states.at(-1).error.message, /runtime lost/i)
+})
+
+test('loads the post-intro page through its createExperience entry point', async () => {
+  const states = []
+  const controller = { destroy() {} }
+  const loader = createDemoLoader({
+    importDemo: async () => ({
+      createExperience: async () => controller,
+    }),
+    container: {},
+    onState: (state) => states.push(state),
+  })
+
+  assert.equal(await loader.start(), controller)
+  assert.equal(states.at(-1).status, 'ready')
 })
 
 test('bindRetry invokes reload once and returns cleanup', () => {

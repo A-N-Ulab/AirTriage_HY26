@@ -9,20 +9,15 @@ async function skipIntro(page) {
   await expect(page.locator('[data-demo-shell]')).toHaveClass(/is-revealed/)
 }
 
-async function expectReadyTerrain(page, screenshotName) {
+async function expectReadyExperience(page, screenshotName) {
   await skipIntro(page)
   const shell = page.locator('[data-demo-shell]')
   await expect(shell).toHaveAttribute('data-state', 'ready')
   await expect(page.locator('.intro')).toHaveCount(0)
 
-  const canvas = page.locator('.terrain-demo__canvas')
-  await expect(canvas).toBeVisible()
-  const dimensions = await canvas.evaluate((element) => {
-    const rect = element.getBoundingClientRect()
-    return { width: rect.width, height: rect.height }
-  })
-  expect(dimensions.width).toBeGreaterThan(300)
-  expect(dimensions.height).toBeGreaterThan(300)
+  await expect(page.locator('.experience')).toBeVisible()
+  await expect(page.locator('#nasz-wklad')).toBeVisible()
+  await expect(page.locator('#poparcie-naukowe')).toBeVisible()
 
   const hasOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth,
@@ -54,8 +49,8 @@ test('shows the standalone logo stage on the page background before crossfading 
 
 test('centres the logo mark without clipping it at any viewport', async ({ page }) => {
   // This check only looks at the splash. Block the demo chunk so the repeated
-  // viewports never spin up a WebGL context and starve the tests that follow.
-  await page.route('**/assets/demo-*.js', (route) => route.abort())
+  // This test needs only the splash, so avoid loading the page chunk repeatedly.
+  await page.route('**/assets/experience-*.js', (route) => route.abort())
 
   const viewports = [
     { width: 1920, height: 1080 },
@@ -144,18 +139,73 @@ test('hands off when the local film cannot play', async ({ page }) => {
   await expect(page.locator('[data-demo-shell]')).toHaveClass(/is-revealed/)
 })
 
-test('renders the terrain at a desktop viewport', async ({ page }) => {
+test('renders the interactive page at a desktop viewport', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
-  await expectReadyTerrain(page, 'demo-desktop.png')
+  await expectReadyExperience(page, 'experience-desktop.png')
 })
 
-test('renders the terrain without overflow at a mobile viewport', async ({ page }) => {
+test('renders the interactive page without overflow at a mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await expectReadyTerrain(page, 'demo-mobile.png')
+  await expectReadyExperience(page, 'experience-mobile.png')
 })
 
-test('keeps a polished loading surface visible while the demo chunk is delayed', async ({ page }) => {
-  await page.route('**/assets/demo-*.js', async (route) => {
+test('keeps the main film paused at its midpoint and scrubs it by dragging', async ({ page }) => {
+  await skipIntro(page)
+  const surface = page.locator('[data-scrub-surface]')
+  const video = page.locator('[data-scrub-video]')
+
+  await expect(video).toHaveAttribute('src', '/video/film_2.mp4')
+  await expect
+    .poll(() =>
+      video.evaluate((element) => ({
+        currentTime: element.currentTime,
+        duration: element.duration,
+        paused: element.paused,
+        controls: element.controls,
+        autoplay: element.autoplay,
+      })),
+    )
+    .toMatchObject({ paused: true, controls: false, autoplay: false })
+  await expect.poll(() => video.evaluate((element) => element.duration)).toBeGreaterThan(0)
+
+  const midpoint = await video.evaluate((element) => ({
+    currentTime: element.currentTime,
+    duration: element.duration,
+  }))
+  expect(Math.abs(midpoint.currentTime - midpoint.duration / 2)).toBeLessThan(0.35)
+
+  const box = await surface.boundingBox()
+  await page.mouse.move(box.x + box.width * 0.4, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(box.x + box.width * 0.7, box.y + box.height / 2, { steps: 4 })
+  await page.mouse.up()
+
+  await expect.poll(() => video.evaluate((element) => element.currentTime)).toBeGreaterThan(
+    midpoint.currentTime,
+  )
+  expect(await video.evaluate((element) => element.paused)).toBe(true)
+})
+
+test('shows text placeholders for example films that will be added later', async ({ page }) => {
+  await skipIntro(page)
+  await expect(page.locator('.example-card__placeholder')).toHaveCount(2)
+  await expect(page.locator('.example-card__placeholder').first()).toContainText(
+    'Film przykładowy zostanie dodany później',
+  )
+  await expect(page.getByText('Tu będzie opis', { exact: true })).toHaveCount(3)
+})
+
+test('keeps the page usable when the interactive film fails', async ({ page }) => {
+  await page.route('**/video/film_2.mp4', (route) => route.abort())
+  await skipIntro(page)
+
+  await expect(page.locator('.scrub-film__fallback')).toBeVisible()
+  await expect(page.locator('#nasz-wklad')).toBeVisible()
+  await expect(page.locator('#poparcie-naukowe')).toBeVisible()
+})
+
+test('keeps a polished loading surface visible while the page chunk is delayed', async ({ page }) => {
+  await page.route('**/assets/experience-*.js', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 3000))
     await route.continue()
   })
@@ -169,36 +219,14 @@ test('keeps a polished loading surface visible while the demo chunk is delayed',
     .locator('.demo-shell__status')
     .evaluate((element) => getComputedStyle(element).backgroundImage)
   expect(backgroundImage).not.toBe('none')
-  await page.screenshot({ path: 'test-results/demo-loading.png', fullPage: true })
+  await page.screenshot({ path: 'test-results/experience-loading.png', fullPage: true })
 })
 
 test('shows an error and Retry when the lazy chunk fails', async ({ page }) => {
-  await page.route('**/assets/demo-*.js', (route) => route.abort())
+  await page.route('**/assets/experience-*.js', (route) => route.abort())
   await skipIntro(page)
 
   await expect(page.locator('[data-demo-shell]')).toHaveAttribute('data-state', 'error')
-  await expect(page.locator('[data-demo-title]')).toHaveText('Demo unavailable')
+  await expect(page.locator('[data-demo-title]')).toHaveText('Strona niedostępna')
   await expect(page.locator('[data-demo-retry]')).toBeVisible()
-})
-
-test('shows an error and Retry when the WebGL context is lost', async ({ page }) => {
-  await skipIntro(page)
-
-  const shell = page.locator('[data-demo-shell]')
-  await expect(shell).toHaveAttribute('data-state', 'ready')
-  await page.locator('.terrain-demo__canvas').evaluate((canvas) => {
-    canvas.dispatchEvent(new Event('webglcontextlost', { cancelable: true }))
-  })
-
-  await expect(shell).toHaveAttribute('data-state', 'error')
-  await expect(page.locator('[data-demo-title]')).toHaveText('Demo unavailable')
-  await expect(page.locator('[data-demo-retry]')).toBeVisible()
-})
-
-test('disables automatic orbit for reduced motion', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' })
-  await skipIntro(page)
-
-  await expect(page.locator('[data-demo-shell]')).toHaveAttribute('data-state', 'ready')
-  await expect(page.locator('[data-demo-shell]')).toHaveAttribute('data-auto-rotate', 'false')
 })

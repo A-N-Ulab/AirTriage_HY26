@@ -11,26 +11,26 @@ const retry = document.querySelector('[data-demo-retry]')
 
 if (shell && mount && title && message && progress && retry) {
   const loader = createDemoLoader({
-    importDemo: () => import('./demo/index.js'),
+    importDemo: () => import('./experience/index.js'),
     container: mount,
     onState: (state) => {
       shell.dataset.state = state.status
       shell.setAttribute('aria-busy', String(state.status === 'loading'))
-      title.textContent = state.status === 'error' ? 'Demo unavailable' : 'Loading demo'
+      title.textContent = state.status === 'error' ? 'Strona niedostępna' : 'Ładowanie strony'
       message.textContent = state.message
       progress.value = state.progress
       progress.textContent = `${Math.round(state.progress)}%`
 
-      if (state.error) console.error('[demo] failed:', state.error)
+      if (state.error) console.error('[experience] failed:', state.error)
     },
   })
 
-  const beginDemoLoad = () => loader.start()
+  const beginExperienceLoad = () => loader.start()
   requestAnimationFrame(() => {
     if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(beginDemoLoad, { timeout: 800 })
+      window.requestIdleCallback(beginExperienceLoad, { timeout: 800 })
     } else {
-      setTimeout(beginDemoLoad, 50)
+      setTimeout(beginExperienceLoad, 50)
     }
   })
 

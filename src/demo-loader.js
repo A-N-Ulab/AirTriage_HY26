@@ -12,24 +12,25 @@ export function createDemoLoader({ importDemo, container, onState = () => {} }) 
   const start = () => {
     if (currentLoad) return currentLoad
 
-    emit({ status: 'loading', nextProgress: 8, message: 'Loading demo...' })
+    emit({ status: 'loading', nextProgress: 8, message: 'Ładowanie strony...' })
 
     currentLoad = (async () => {
       try {
         const demoModule = await importDemo()
-        emit({ status: 'loading', nextProgress: 32, message: 'Preparing demo...' })
+        emit({ status: 'loading', nextProgress: 32, message: 'Przygotowujemy stronę...' })
 
         let runtimeFailed = false
         const reportRuntimeError = (error) => {
           runtimeFailed = true
           emit({
             status: 'error',
-            message: 'Demo unavailable',
+            message: 'Strona niedostępna',
             error: error instanceof Error ? error : new Error(String(error)),
           })
         }
 
-        const controller = await demoModule.createDemo({
+        const createRuntime = demoModule.createExperience ?? demoModule.createDemo
+        const controller = await createRuntime({
           container,
           onError: reportRuntimeError,
           onProgress: ({ progress: nextProgress, message }) => {
@@ -42,12 +43,12 @@ export function createDemoLoader({ importDemo, container, onState = () => {} }) 
           return null
         }
 
-        emit({ status: 'ready', nextProgress: 100, message: 'Demo ready' })
+        emit({ status: 'ready', nextProgress: 100, message: 'Strona gotowa' })
         return controller
       } catch (error) {
         emit({
           status: 'error',
-          message: 'Demo unavailable',
+          message: 'Strona niedostępna',
           error: error instanceof Error ? error : new Error(String(error)),
         })
         return null

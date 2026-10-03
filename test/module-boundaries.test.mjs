@@ -22,12 +22,12 @@ test('intro lives in its own folder', () => {
   }
 })
 
-test('intro has no demo or Three.js dependency', () => {
+test('intro has no page experience dependency', () => {
   const sources = ['index.js', 'timeline.js']
     .map((file) => readFileSync(join(introRoot, file), 'utf8'))
     .join('\n')
 
-  assert.doesNotMatch(sources, /(?:from\s+['"]three['"]|\/demo\/)/)
+  assert.doesNotMatch(sources, /\/experience\//)
 })
 
 test('logo and film stages can be developed without importing each other', () => {
@@ -57,13 +57,13 @@ test('legacy intro files are removed from the source root', () => {
   }
 })
 
-test('the entry point loads the demo through a dynamic import', () => {
+test('the entry point loads the page experience through a dynamic import', () => {
   const mainSource = readFileSync(join(projectRoot, 'src', 'main.js'), 'utf8')
-  assert.match(mainSource, /import\(['"]\.\/demo\/index\.js['"]\)/)
-  assert.doesNotMatch(mainSource, /from\s+['"]\.\/demo\//)
+  assert.match(mainSource, /import\(['"]\.\/experience\/index\.js['"]\)/)
+  assert.doesNotMatch(mainSource, /from\s+['"]\.\/experience\//)
 })
 
-test('the production entry chunk excludes the Three.js renderer', () => {
+test('the production entry keeps the interactive page in a lazy chunk', () => {
   const viteCli = join(projectRoot, 'node_modules', 'vite', 'bin', 'vite.js')
   execFileSync(process.execPath, [viteCli, 'build'], {
     cwd: projectRoot,
@@ -73,13 +73,14 @@ test('the production entry chunk excludes the Three.js renderer', () => {
   const assetsRoot = join(projectRoot, 'dist', 'assets')
   const files = readdirSync(assetsRoot)
   const entryFile = files.find((file) => /^index-.*\.js$/.test(file))
-  const demoFile = files.find((file) => /^demo-.*\.js$/.test(file))
+  const experienceFile = files.find((file) => /^experience-.*\.js$/.test(file))
 
   assert.ok(entryFile, 'entry chunk is missing')
-  assert.ok(demoFile, 'lazy demo chunk is missing')
+  assert.ok(experienceFile, 'lazy experience chunk is missing')
 
   const entrySource = readFileSync(join(assetsRoot, entryFile), 'utf8')
-  const demoSource = readFileSync(join(assetsRoot, demoFile), 'utf8')
-  assert.doesNotMatch(entrySource, /WebGLRenderer|OrbitControls/)
-  assert.match(demoSource, /WebGLRenderer|OrbitControls/)
+  const experienceSource = readFileSync(join(assetsRoot, experienceFile), 'utf8')
+  assert.doesNotMatch(entrySource, /film_2\.mp4|pointerdown/)
+  assert.match(experienceSource, /film_2\.mp4/)
+  assert.match(experienceSource, /pointerdown/)
 })
