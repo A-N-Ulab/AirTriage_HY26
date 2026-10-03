@@ -1,5 +1,5 @@
 import './intro.css'
-import { PHASE, YT_PLAYING, createIntroLoader } from './loader.js'
+import { PHASE, YT_PLAYING, createIntroLoader } from './timeline.js'
 
 const VIDEO_ID = 'egf9XjBIgF0'
 // Tweak these two to pick a different moment of the drone reel.

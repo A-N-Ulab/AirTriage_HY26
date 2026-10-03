@@ -1,123 +1,126 @@
 # AirTriage_HY26
 
-A lightweight Vite-based single-page site for the AirTriage HY26 workstream: a short
-intro sequence (wordmark → drone footage) that hands off to a "big coming soon" screen.
+AirTriage is a Vite single-page experience with two deliberately independent parts:
 
-## The intro sequence
+1. a lightweight branded film intro that starts immediately;
+2. a lazy-loaded Three.js terrain demo that downloads in the background.
 
-`src/intro.js` plays a ~7s intro over the page, then reveals the coming-soon screen:
+The intro hands off without a page reload. If the demo is still loading, the visitor
+sees a full-screen progress surface. A failed module download or unavailable WebGL
+renderer produces a readable error with a Retry button rather than an empty canvas.
+
+## Architecture
+
+`src/main.js` is the only coordinator. It starts the intro, schedules the dynamic demo
+import after first paint, and maps loader events to the page shell. The intro never
+imports Three.js or any demo source.
+
+```text
+src/
+|-- main.js                 # intro/demo orchestration only
+|-- demo-loader.js          # loading, ready, error and retry states
+|-- style.css               # shared shell and loading/error presentation
+|-- intro/
+|   |-- index.js            # video overlay and public playIntro API
+|   |-- timeline.js         # DOM-independent intro state machine
+|   `-- intro.css           # intro-only presentation
+`-- demo/
+    |-- index.js            # public createDemo API and Three.js runtime
+    |-- terrain.js          # deterministic terrain geometry and colors
+    `-- demo.css            # canvas and terrain HUD presentation
+```
+
+The boundary between the shell and demo is:
+
+```js
+createDemo({ container, onProgress })
+```
+
+It resolves after the first rendered frame and returns `{ destroy() }`. This keeps demo
+development inside `src/demo/` and allows the film to evolve independently in
+`src/intro/`.
+
+## Intro sequence
+
+`src/intro/index.js` plays a short wordmark and drone-film sequence:
 
 | Beat | Duration | What happens |
 | --- | --- | --- |
-| `title` | 1000ms | `AirTriage` wordmark, letters rise with a 40ms stagger, accent rule expands |
-| `dissolve` | 600ms | Wordmark scales up + blurs out; video fades up beneath it |
-| `cruise` | 4000ms | Drone footage with a slow push-in, corner lockup, **Skip →** button |
-| `handoff` | 600ms | Video dissolves out to the page background |
-| `settle` | 800ms | `BIG COMING SOON ...` fades and scales in |
+| `title` | 1000 ms | AirTriage wordmark and accent enter |
+| `dissolve` | 600 ms | Wordmark dissolves into the film |
+| `cruise` | 4000 ms | Muted drone footage and Skip control |
+| `handoff` | 600 ms | Film fades toward the loading/demo shell |
+| `settle` | 800 ms | The underlying shell is revealed |
 
-A 2px progress bar tracks the whole sequence. **Skip →** or `Escape` jumps straight to
-the hand-off.
+The film is a muted `youtube-nocookie.com` embed. `Escape` or **Skip** jumps to the
+handoff. Blocked autoplay displays **Tap to begin** and can never trap the visitor.
 
-`src/loader.js` owns the timeline and has no DOM or video knowledge; `src/intro.js` owns
-the overlay markup and the embed. Split this way so the video source can be swapped
-without touching the timing logic.
+## Background loading and failures
 
-### The video
+After the first paint, `src/main.js` dynamically imports `src/demo/index.js`. Vite emits
+the demo and Three.js as a separate chunk, so they do not delay the initial entry bundle.
 
-The footage is a muted, autoplaying YouTube embed (`youtube-nocookie.com`), trimmed to the
-window set by `SEGMENT_START` / `SEGMENT_END` in `src/intro.js`. Playback must be muted
-for browsers to allow autoplay.
+The progress bar reports real application stages: module request, module loaded, terrain
+generation, camera setup, renderer setup, and first frame. A slow demo remains on the
+loader after the film. Import, WebGL, and initialization failures switch to
+**Demo unavailable** with Retry.
 
-Graceful degradation, so the intro can never trap a visitor:
+Visitors without JavaScript still receive the static `BIG COMING SOON ...` fallback.
 
-- If muted autoplay is refused, a **Tap to begin** pill appears; tapping retries playback.
-- If the embed never reports playback within 1.5s, the intro continues anyway.
-- If JavaScript is disabled, the coming-soon screen renders directly.
-- `prefers-reduced-motion: reduce` drops the push-in, the letter stagger and the blur.
+## Terrain demo
 
-> The footage is third-party drone footage owned by its uploader. It is streamed from
-> YouTube and not redistributed here. Swap `SEGMENT_START` / `SEGMENT_END` to pick a
-> different moment.
+The current demo generates a deterministic mountain without downloading a model. A
+dense plane is displaced with layered noise and a central massif envelope. Vertex
+colors blend forest, alpine vegetation, exposed rock, and snow using both elevation and
+slope. Atmospheric fog, soft directional light, capped pixel ratio, and a lower mobile
+mesh resolution keep the result map-like and responsive.
 
-## Design tokens
+Controls:
 
-Defined once in `src/style.css` as CSS custom properties:
+- drag or swipe to orbit;
+- scroll or pinch to zoom;
+- the camera rotates slowly until the first interaction;
+- `prefers-reduced-motion: reduce` disables automatic rotation.
 
-| Token | Value | Use |
-| --- | --- | --- |
-| `--bg` | `#fef2e4` | Page background, and the wash over the footage |
-| `--primary` | `#355f47` | Titles, wordmark, lockup, progress bar |
-| `--secondary` | `#5d7065` | Supporting text |
-| `--font-title` | `HK Modular` → `Inter` | Wordmark and headings |
-| `--font-body` | `Inter` | Everything else |
+## Development
 
-### Fonts
-
-`Inter` loads from Google Fonts. **HK Modular is a paid licence** from
-[Hanken Design Co](https://hanken.co) with no public CDN, so `src/style.css` only declares
-a `local()` source. To use it, drop the licensed webfont into `public/fonts/` and add it to
-the `@font-face`:
-
-```css
-src: url('/fonts/HKModular.woff2') format('woff2');
-```
-
-Until then the title stack falls back to Inter.
-
-## Run locally
-
-### Prerequisites
-
-- Node.js 18+ (recommended)
-- npm
-
-### Install dependencies
+Requires Node.js 20+ and npm.
 
 ```bash
 npm install
-```
-
-### Start development server
-
-```bash
 npm run dev
 ```
 
-### Build for production
+Verification commands:
 
 ```bash
+npm test
 npm run build
-```
-
-### Preview production build
-
-```bash
+npx playwright install chromium
 npm run preview
+npm run test:render
 ```
 
-`vite.config.js` sets `base: '/AirTriage_HY26/'` because the site is served from a
-subdirectory on GitHub Pages.
+`npm test` covers module boundaries, loader failure states, progress monotonicity, and
+terrain geometry. The Playwright suite covers desktop/mobile rendering, delayed chunks,
+failed chunks, Retry, and reduced motion. Set `PLAYWRIGHT_BASE_URL` when previewing on a
+non-default address. `PLAYWRIGHT_CHROMIUM_PATH` may point at an existing Chrome/Chromium
+binary when the bundled browser is unavailable.
 
-## Deploy
+## Deployment
 
-Pushing to `main` runs `.github/workflows/deploy-pages.yml`, which builds `dist/` and
-publishes it to GitHub Pages.
+Pushing to `main` runs `.github/workflows/deploy-pages.yml`. Vite uses `base: '/'`, and
+`public/CNAME` publishes the custom domain:
 
-## File structure
+<https://airtriage.anulab.tech/>
 
-```text
-AirTriage_HY26/
-├── public/                 # Static assets copied as-is
-│   └── favicon.png
-├── src/
-│   ├── intro.css           # Intro overlay styles and phase states
-│   ├── intro.js            # Overlay DOM + YouTube embed controller
-│   ├── loader.js           # Intro timeline state machine (no DOM)
-│   ├── main.js             # Entry: reveals the screen, starts the intro
-│   └── style.css           # Design tokens + coming-soon screen
-├── index.html              # App entry HTML
-├── package.json
-├── vite.config.js          # Vite configuration (base path)
-└── .github/workflows/
-    └── deploy-pages.yml    # GitHub Pages deployment
-```
+The Pages workflow also runs the custom-domain regression check before building.
+
+## Fonts and third-party media
+
+Inter loads from Google Fonts. HK Modular is a paid Hanken Design Co font; the CSS uses
+a local copy when present and falls back to Inter. Licensed font files can be placed in
+`public/fonts/` and referenced by the existing `@font-face` declaration.
+
+The intro film remains hosted by its original YouTube uploader and is streamed rather
+than redistributed by this repository.

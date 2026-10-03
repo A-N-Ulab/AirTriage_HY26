@@ -65,6 +65,140 @@ body {
   display: flex;
 }
 
+/* --------------------------------------------------------- demo handoff -- */
+
+.demo-shell {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.9), transparent 42%),
+    var(--bg);
+}
+
+.demo-shell__mount {
+  position: absolute;
+  inset: 0;
+}
+
+.demo-shell__status {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 2rem;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255, 252, 246, 0.96), rgba(244, 240, 224, 0.88) 48%, transparent 78%),
+    linear-gradient(180deg, #dce8e7 0%, #eef0df 52%, #fef2e4 100%);
+}
+
+.demo-shell__eyebrow,
+.demo-shell__message {
+  margin: 0;
+  color: var(--secondary);
+}
+
+.demo-shell__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.demo-shell__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 4.75rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.demo-shell__message {
+  min-height: 1.5em;
+  font-size: 0.9rem;
+}
+
+.demo-shell__progress {
+  width: min(360px, 72vw);
+  height: 3px;
+  margin-top: 0.65rem;
+  appearance: none;
+  border: 0;
+  background: var(--primary-a12);
+}
+
+.demo-shell__progress::-webkit-progress-bar {
+  background: var(--primary-a12);
+}
+
+.demo-shell__progress::-webkit-progress-value {
+  background: var(--primary);
+  transition: width 0.45s ease;
+}
+
+.demo-shell__progress::-moz-progress-bar {
+  background: var(--primary);
+}
+
+.demo-shell__retry {
+  display: none;
+  margin-top: 0.75rem;
+  padding: 0.7rem 1.2rem;
+  font: 600 0.78rem/1 var(--font-body);
+  color: var(--primary);
+  background: transparent;
+  border: 1px solid var(--primary-a30);
+  border-radius: 999px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.js .demo-shell {
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+
+.js .demo-shell.is-revealed {
+  opacity: 1;
+}
+
+.js .demo-shell__status {
+  display: flex;
+}
+
+.js .coming-soon {
+  display: none;
+}
+
+.demo-shell[data-state='ready'] .demo-shell__status {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.65s ease,
+    visibility 0.65s;
+}
+
+.demo-shell[data-state='error'] .demo-shell__progress {
+  display: none;
+}
+
+.demo-shell[data-state='error'] .demo-shell__retry {
+  display: inline-flex;
+}
+
+.demo-shell__retry:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+
 /* ------------------------------------------------- coming soon screen -- */
 
 .coming-soon {
@@ -141,6 +275,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .js .demo-shell {
+    transition-duration: 0.2s;
+  }
+
   .js .coming-soon.is-revealed .coming-soon__title {
     transition: opacity 0.4s linear;
   }
