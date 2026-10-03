@@ -1,0 +1,373 @@
+/* Full-screen intro overlay: wordmark -> drone footage -> hand-off. */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.intro[data-leaving='true'] {
+  opacity: 0;
+}
+
+/* ---------------------------------------------------------------- video -- */
+
+.intro__media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.intro__drift {
+  position: absolute;
+  inset: 0;
+  transform: scale(1.02);
+  animation: intro-drift 9s ease-in-out infinite alternate;
+  animation-play-state: paused;
+}
+
+.intro__iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  /*
+   * The reel is a 2.39:1 cinematic crop letterboxed inside 16:9. Scaling past
+   * ~1.4 pushes those baked-in bars outside the frame, and also crops off the
+   * player's own YouTube badge in the bottom-right corner.
+   */
+  transform: scale(1.45);
+  pointer-events: none;
+}
+
+/* Transparent layer that swallows clicks so the video never links out. */
+.intro__shield {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: transparent;
+  pointer-events: auto;
+}
+
+@keyframes intro-drift {
+  from {
+    transform: scale(1.02);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+@media (orientation: portrait) {
+  .intro__iframe {
+    transform: scale(2);
+  }
+}
+
+/* ---------------------------------------------------------------- scrim -- */
+
+.intro__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  background:
+    linear-gradient(
+      to top,
+      rgba(4, 7, 15, 0.94) 0%,
+      rgba(4, 7, 15, 0.55) 22%,
+      rgba(4, 7, 15, 0.12) 48%,
+      rgba(4, 7, 15, 0) 70%
+    ),
+    radial-gradient(120% 80% at 50% 50%, rgba(4, 7, 15, 0) 38%, rgba(4, 7, 15, 0.5) 100%);
+}
+
+/* ------------------------------------------------------------ wordmark -- */
+
+.intro__stage {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  opacity: 1;
+  transform: scale(1);
+  filter: blur(0);
+  transition:
+    opacity 0.6s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1),
+    filter 0.6s ease;
+}
+
+.intro__wordmark {
+  display: flex;
+  margin: 0;
+  font-size: clamp(3.2rem, 11vw, 9rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-shadow: 0 12px 44px rgba(6, 23, 60, 0.7);
+}
+
+.intro__wordmark span {
+  display: inline-block;
+  animation: intro-letter 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 40ms);
+}
+
+@keyframes intro-letter {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+.intro__accent {
+  display: block;
+  width: clamp(80px, 20vw, 240px);
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--brand-yellow),
+    transparent
+  );
+  transform: scaleX(0);
+  animation: intro-accent 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+  animation-delay: 0.45s;
+}
+
+@keyframes intro-accent {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* -------------------------------------------------------------- lockup -- */
+
+.intro__lockup {
+  position: absolute;
+  left: clamp(1.25rem, 4vw, 3rem);
+  bottom: clamp(2.5rem, 7vh, 3.5rem);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.intro__accent--lockup {
+  width: 34px;
+  animation: none;
+  transform: none;
+}
+
+.intro__name {
+  font-size: clamp(0.95rem, 1.6vw, 1.25rem);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------ controls -- */
+
+.intro__skip,
+.intro__tap {
+  position: absolute;
+  z-index: 6;
+  appearance: none;
+  font: inherit;
+  color: var(--brand-white);
+  background: rgba(4, 7, 15, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.intro__skip {
+  top: clamp(1.25rem, 4vw, 2.5rem);
+  right: clamp(1.25rem, 4vw, 2.5rem);
+  padding: 0.55rem 1.05rem;
+  font-size: 0.78rem;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.intro__tap {
+  left: 50%;
+  bottom: clamp(3.5rem, 14vh, 6rem);
+  padding: 0.8rem 1.5rem;
+  font-size: 0.8rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 10px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease,
+    visibility 0.4s,
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.intro[data-tap='visible'] .intro__tap {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.intro__skip:hover,
+.intro__tap:hover {
+  background: rgba(4, 7, 15, 0.52);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.intro__skip:focus-visible,
+.intro__tap:focus-visible {
+  outline: 2px solid var(--brand-yellow);
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------ progress -- */
+
+.intro__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 7;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.intro__progress-bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--brand-yellow);
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* ------------------------------------------------------- phase states -- */
+
+.intro[data-phase='dissolve'] .intro__media,
+.intro[data-phase='cruise'] .intro__media {
+  opacity: 1;
+}
+
+.intro[data-phase='dissolve'] .intro__drift,
+.intro[data-phase='cruise'] .intro__drift {
+  animation-play-state: running;
+}
+
+.intro[data-phase='dissolve'] .intro__scrim {
+  opacity: 0.5;
+}
+
+.intro[data-phase='cruise'] .intro__scrim {
+  opacity: 1;
+}
+
+.intro[data-phase='cruise'] .intro__lockup,
+.intro[data-phase='cruise'] .intro__skip {
+  opacity: 1;
+  transform: none;
+}
+
+.intro[data-phase='handoff'] .intro__media,
+.intro[data-phase='handoff'] .intro__scrim,
+.intro[data-phase='settle'] .intro__media,
+.intro[data-phase='settle'] .intro__scrim {
+  opacity: 0;
+}
+
+.intro[data-phase='handoff'] .intro__drift,
+.intro[data-phase='settle'] .intro__drift {
+  animation-play-state: paused;
+}
+
+.intro[data-phase='handoff'] .intro__lockup,
+.intro[data-phase='handoff'] .intro__skip,
+.intro[data-phase='handoff'] .intro__tap,
+.intro[data-phase='settle'] .intro__lockup,
+.intro[data-phase='settle'] .intro__skip,
+.intro[data-phase='settle'] .intro__tap {
+  opacity: 0;
+}
+
+.intro[data-phase='handoff'] .intro__stage,
+.intro[data-phase='cruise'] .intro__stage,
+.intro[data-phase='settle'] .intro__stage,
+.intro[data-phase='done'] .intro__stage {
+  opacity: 0;
+  transform: scale(1.08);
+  filter: blur(10px);
+}
+
+.intro[data-phase='handoff'] .intro__lockup {
+  transform: translateY(12px);
+}
+
+.intro[data-phase='handoff'] .intro__skip {
+  transform: translateY(-8px);
+}
+
+/* ----------------------------------------------------- reduced motion -- */
+
+@media (prefers-reduced-motion: reduce) {
+  .intro__drift {
+    animation: none;
+  }
+
+  .intro__wordmark span {
+    animation: none;
+    opacity: 1;
+  }
+
+  .intro__accent {
+    animation: none;
+    transform: scaleX(1);
+  }
+
+  .intro__stage,
+  .intro[data-phase='handoff'] .intro__stage,
+  .intro[data-phase='cruise'] .intro__stage,
+  .intro[data-phase='settle'] .intro__stage,
+  .intro[data-phase='done'] .intro__stage {
+    transform: none;
+    filter: none;
+    transition: opacity 0.4s linear;
+  }
+}

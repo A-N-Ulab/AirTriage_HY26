@@ -1,7 +1,14 @@
 :root {
+  --brand-blue: #0c3078;
+  --brand-blue-deep: #06173c;
+  --brand-ink: #04070f;
+  --brand-yellow: #fccc00;
+  --brand-white: #ffffff;
+  --brand-muted: #93a6cc;
+
   font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
-  color: #f3f6ff;
-  background: radial-gradient(circle at top, #2d3f63 0%, #0d1526 48%, #060a14 100%);
+  color: var(--brand-white);
+  background: var(--brand-ink);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -11,38 +18,101 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  min-height: 100%;
+}
+
+body {
   min-height: 100vh;
+  background:
+    radial-gradient(
+      120% 90% at 50% 8%,
+      var(--brand-blue) 0%,
+      var(--brand-blue-deep) 42%,
+      var(--brand-ink) 100%
+    );
+  background-attachment: fixed;
 }
 
 #app {
   min-height: 100vh;
+  display: flex;
 }
 
-.hero {
-  min-height: 100vh;
+/* ------------------------------------------------- coming soon screen -- */
+
+.coming-soon {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
-  padding: 2rem;
-}
-
-h1 {
-  margin: 0;
+  gap: 1.75rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
   text-align: center;
-  font-size: clamp(2.8rem, 7vw, 6.2rem);
-  letter-spacing: 0.1em;
-  text-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
 }
 
-#mountain-canvas {
-  width: min(90vw, 1100px);
-  height: min(70vh, 640px);
+.coming-soon__title {
+  margin: 0;
+  /*
+   * As a column flex item with `align-items: center` the heading sizes to
+   * max-content, so it must be capped explicitly or it overflows sideways on
+   * narrow screens instead of wrapping.
+   */
+  max-width: 100%;
+  font-size: clamp(1.9rem, 6.4vw, 5.4rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+}
+
+.coming-soon__rule {
   display: block;
-  border-radius: 24px;
-  background: linear-gradient(180deg, rgba(116, 157, 216, 0.32), rgba(5, 8, 18, 0.15));
-  box-shadow: 0 30px 45px rgba(0, 0, 0, 0.35);
+  width: clamp(72px, 18vw, 220px);
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--brand-yellow),
+    transparent
+  );
+  transform: scaleX(0);
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/*
+ * Entrance is only armed when JS is running (see the inline script in
+ * index.html), so a no-JS visitor still sees the message.
+ */
+.js .coming-soon__title {
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.js .coming-soon__rule {
+  transform: scaleX(0);
+}
+
+.js .coming-soon.is-revealed .coming-soon__title {
+  opacity: 1;
+  transform: none;
+}
+
+.js .coming-soon.is-revealed .coming-soon__rule {
+  transform: scaleX(1);
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .coming-soon__title {
+    transform: none;
+    transition: opacity 0.4s linear;
+  }
 }

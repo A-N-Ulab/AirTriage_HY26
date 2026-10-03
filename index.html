@@ -4,10 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>airtriage-hy26</title>
+    <title>AirTriage — Coming Soon</title>
+    <meta name="description" content="AirTriage. Big coming soon." />
+    <meta name="theme-color" content="#0c3078" />
+
+    <link rel="preconnect" href="https://www.youtube-nocookie.com" />
+    <link rel="dns-prefetch" href="https://i.ytimg.com" />
+    <script>
+      // Marks that JS is available so the coming-soon screen can stay hidden
+      // behind the intro instead of flashing on first paint.
+      document.documentElement.classList.add('js')
+    </script>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <main class="coming-soon" data-coming-soon>
+        <span class="coming-soon__rule" aria-hidden="true"></span>
+        <h1 class="coming-soon__title">BIG COMING SOON ...</h1>
+      </main>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
