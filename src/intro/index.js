@@ -4,6 +4,9 @@ import { createVideoStage } from './video-stage.js'
 import { PHASE, YT_PLAYING, createIntroLoader } from './timeline.js'
 
 const VIDEO_ID = 'egf9XjBIgF0'
+// Owned by the coordinator and injected into both stages, so neither the logo
+// stage nor the film stage references the brand asset directly.
+const LOGO_ASSET_PATH = '/brand/airtriage-logo.svg'
 // Tweak these two to pick a different moment of the drone reel.
 const SEGMENT_START = 85
 const SEGMENT_END = 100
@@ -39,13 +42,14 @@ export function playIntro({ revealTarget } = {}) {
   const overlay = document.createElement('div')
   overlay.className = 'intro'
   overlay.dataset.phase = PHASE.IDLE
-  overlay.append(createVideoStage(), createLogoStage())
+  overlay.append(
+    createVideoStage({ logoUrl: LOGO_ASSET_PATH }),
+    createLogoStage({ logoUrl: LOGO_ASSET_PATH }),
+  )
   document.body.append(overlay)
 
   const iframe = overlay.querySelector('.intro__iframe')
   const bar = overlay.querySelector('.intro__progress-bar')
-  const skipButton = overlay.querySelector('.intro__skip')
-  const tapButton = overlay.querySelector('.intro__tap')
 
   const loader = createIntroLoader({
     onChange: ({ phase, progress }) => {
@@ -56,14 +60,7 @@ export function playIntro({ revealTarget } = {}) {
         revealTarget?.classList.add('is-revealed')
       }
     },
-    onStall: () => {
-      overlay.dataset.tap = 'visible'
-    },
   })
-
-  const hideTap = () => {
-    overlay.dataset.tap = 'hidden'
-  }
 
   const onMessage = (event) => {
     if (!EMBED_ORIGINS.includes(event.origin)) return
@@ -80,46 +77,28 @@ export function playIntro({ revealTarget } = {}) {
 
     // Accept PLAYING from any player event, not just onStateChange: if playback
     // starts before the first state change is delivered, onReady/initialDelivery
-    // is the only signal we get, and missing it would wrongly raise the tap pill.
+    // is the only signal we get, and missing it would hold the cruise beat.
     if (payload.info?.playerState === YT_PLAYING) {
-      hideTap()
       loader.markVideoReady()
     }
   }
 
-  const onSkip = () => loader.skip()
-
+  // Escape remains as the keyboard route past the film; there are no visible
+  // controls, so the autoplay guard in the timeline is the only other path and
+  // it always lets the intro finish on its own.
   const onKeyDown = (event) => {
     if (event.key === 'Escape') loader.skip()
-  }
-
-  // Muted autoplay can still be refused; a user gesture is a valid way to retry.
-  const onTap = () => {
-    hideTap()
-    iframe.contentWindow?.postMessage(
-      JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
-      '*',
-    )
-    // If the gesture did not help, stop waiting and let the intro finish.
-    setTimeout(() => {
-      overlay.dataset.tap = 'hidden'
-      loader.markVideoReady()
-    }, 2500)
   }
 
   const teardown = () => {
     window.removeEventListener('message', onMessage)
     window.removeEventListener('keydown', onKeyDown)
-    skipButton.removeEventListener('click', onSkip)
-    tapButton.removeEventListener('click', onTap)
     loader.destroy()
     iframe.src = 'about:blank'
     iframe.remove()
     overlay.remove()
   }
 
-  skipButton.addEventListener('click', onSkip)
-  tapButton.addEventListener('click', onTap)
   window.addEventListener('message', onMessage)
   window.addEventListener('keydown', onKeyDown)
 

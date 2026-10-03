@@ -56,13 +56,14 @@ the demo remains an independent lazy-loaded bundle.
 | Stage | Duration | What happens |
 | --- | --- | --- |
 | `logo` | 2000 ms | The exact transparent SVG mark sits centred on the cream background |
-| `video` | 4000 ms | A 300 ms crossfade reveals muted drone footage and Skip |
+| `video` | 4000 ms | A 300 ms crossfade reveals muted drone footage and the mark |
 | `demo` | ongoing | The terrain or its loading/error surface takes over |
 
 The film-to-demo handoff lasts 600 ms and is a transition rather than another stage.
 
-The film is a muted `youtube-nocookie.com` embed. `Escape` or **Skip** jumps to the
-handoff. Blocked autoplay displays **Tap to begin** and can never trap the visitor.
+The film is a muted `youtube-nocookie.com` embed with no visible controls. `Escape`
+jumps to the handoff. If autoplay is blocked the intro still completes on its own after
+a short guard, so the visitor is never trapped.
 
 The production mark is `public/brand/airtriage-logo.svg`. It contains vector paths and
 no background or embedded raster. The supplied JPG is retained only as
