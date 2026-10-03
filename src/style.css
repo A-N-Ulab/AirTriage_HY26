@@ -1,7 +1,38 @@
+/*
+ * HK Modular is a paid licence from Hanken Design Co and has no public CDN.
+ * This declaration picks up a locally installed copy; to self-host, drop the
+ * licensed webfont into public/fonts/ and add it as a src, e.g.
+ *
+ *   src: url('/fonts/HKModular.woff2') format('woff2'),
+ *
+ * Until then the --font-title stack falls back to Inter.
+ */
+@font-face {
+  font-family: 'HK Modular';
+  src: local('HK Modular');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 :root {
-  font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
-  color: #f3f6ff;
-  background: radial-gradient(circle at top, #2d3f63 0%, #0d1526 48%, #060a14 100%);
+  /* design tokens */
+  --bg: #fef2e4;
+  --primary: #355f47;
+  --secondary: #5d7065;
+
+  --font-title: 'HK Modular', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* derived, for effects that need the tokens at low alpha */
+  --primary-a12: rgba(53, 95, 71, 0.12);
+  --primary-a30: rgba(53, 95, 71, 0.3);
+  --bg-a55: rgba(254, 242, 228, 0.55);
+  --bg-a96: rgba(254, 242, 228, 0.96);
+
+  font-family: var(--font-body);
+  color: var(--primary);
+  background: var(--bg);
+  color-scheme: light;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -11,38 +42,106 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  min-height: 100%;
+}
+
+body {
   min-height: 100vh;
+  background:
+    radial-gradient(
+      120% 100% at 50% 0%,
+      #fff8ee 0%,
+      var(--bg) 45%,
+      #f7e8d6 100%
+    );
+  background-attachment: fixed;
 }
 
 #app {
   min-height: 100vh;
+  display: flex;
 }
 
-.hero {
-  min-height: 100vh;
+/* ------------------------------------------------- coming soon screen -- */
+
+.coming-soon {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
-  padding: 2rem;
-}
-
-h1 {
-  margin: 0;
+  gap: 1.75rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
   text-align: center;
-  font-size: clamp(2.8rem, 7vw, 6.2rem);
-  letter-spacing: 0.1em;
-  text-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
 }
 
-#mountain-canvas {
-  width: min(90vw, 1100px);
-  height: min(70vh, 640px);
+.coming-soon__title {
+  margin: 0;
+  /*
+   * As a column flex item with `align-items: center` the heading sizes to
+   * max-content, so it must be capped explicitly or it overflows sideways on
+   * narrow screens instead of wrapping.
+   */
+  max-width: 100%;
+  font-family: var(--font-title);
+  font-size: clamp(1.8rem, 6vw, 5.2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.coming-soon__rule {
   display: block;
-  border-radius: 24px;
-  background: linear-gradient(180deg, rgba(116, 157, 216, 0.32), rgba(5, 8, 18, 0.15));
-  box-shadow: 0 30px 45px rgba(0, 0, 0, 0.35);
+  width: clamp(72px, 18vw, 220px);
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--primary) 50%,
+    transparent
+  );
+  opacity: 0.55;
+  transform: scaleX(0);
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/*
+ * Entrance is only armed when JS is running (see the inline script in
+ * index.html), so a no-JS visitor still sees the message.
+ *
+ * Deliberately no transition on the hidden state: before the stylesheet lands
+ * the heading is briefly visible, and transitioning to opacity 0 would ghost it
+ * behind the intro instead of hiding it outright. Only the reveal animates.
+ */
+.js .coming-soon__title {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+.js .coming-soon__rule {
+  transform: scaleX(0);
+}
+
+.js .coming-soon.is-revealed .coming-soon__title {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.js .coming-soon.is-revealed .coming-soon__rule {
+  transform: scaleX(1);
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .coming-soon.is-revealed .coming-soon__title {
+    transition: opacity 0.4s linear;
+  }
 }
