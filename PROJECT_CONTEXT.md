@@ -17,7 +17,7 @@ Demo jest ładowane dynamicznie w tle, więc Three.js nie opóźnia logo ani fil
 | Etap | Implementacja | Zachowanie |
 | --- | --- | --- |
 | 1. Logo | `src/intro/logo-stage.js`, `src/intro/logo-stage.css` | Przezroczyste SVG jest wyświetlane przez dokładnie 2000 ms na tle strony (`--bg`, krem `#fef2e4`). Znak jest wyśrodkowany i ma ograniczoną szerokość oraz wysokość, więc nigdy nie wychodzi poza viewport. Następnie znika w szybkim fade 300 ms. |
-| 2. Film | `src/intro/video-stage.js`, `src/intro/video-stage.css`, `src/intro/index.js` | Lokalny film jest przygotowywany za logo, potem widoczny przez 4000 ms. Nie ma elementów sterujących; Escape przechodzi do kolejnego etapu. |
+| 2. Film | `src/intro/video-stage.js`, `src/intro/video-stage.css`, `src/intro/index.js` | Przy prawidłowym odtwarzaniu lokalny film startuje od początku po logo i pozostaje widoczny aż do zdarzenia `ended`. Nie ma elementów sterujących; Escape pomija film, a błąd lub 30 sekund bez postępu uruchamia handoff awaryjny. |
 | 3. Demo | `src/demo/`, `src/demo-loader.js` | Lazy-loadowane demo Three.js. Przy wolnym ładowaniu widać postęp, a przy błędzie komunikat i Retry. |
 
 Przejście film → demo trwa 600 ms i jest traktowane jako przejście, nie jako

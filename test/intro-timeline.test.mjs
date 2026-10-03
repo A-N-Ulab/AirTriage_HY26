@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import { PHASE, createIntroLoader } from '../src/intro/timeline.js'
+import * as timelineModule from '../src/intro/timeline.js'
 
 function createClock() {
   let now = 0
@@ -55,4 +56,55 @@ test('shows the logo alone for two seconds before starting the film stage', () =
   assert.deepEqual(phases, [PHASE.LOGO, PHASE.VIDEO])
 
   loader.destroy()
+})
+
+test('keeps the film stage active until playback finishes', () => {
+  const clock = createClock()
+  const loader = createIntroLoader({ clock })
+
+  loader.start()
+  clock.tick(2000)
+  assert.equal(loader.phase, PHASE.VIDEO)
+
+  clock.tick(60_000)
+  assert.equal(loader.phase, PHASE.VIDEO)
+  assert.equal(
+    typeof loader.completeVideo,
+    'function',
+    'the timeline must expose a video-completion signal',
+  )
+
+  loader.completeVideo()
+  assert.equal(loader.phase, PHASE.HANDOFF)
+
+  clock.tick(600)
+  assert.equal(loader.phase, PHASE.DONE)
+})
+
+test('abandons playback only after thirty seconds without progress', () => {
+  assert.equal(
+    typeof timelineModule.createPlaybackWatchdog,
+    'function',
+    'the intro must expose a playback-stall watchdog',
+  )
+
+  const clock = createClock()
+  let timeouts = 0
+  const watchdog = timelineModule.createPlaybackWatchdog({
+    clock,
+    onTimeout: () => {
+      timeouts += 1
+    },
+  })
+
+  watchdog.start()
+  clock.tick(29_999)
+  assert.equal(timeouts, 0)
+
+  watchdog.markProgress()
+  clock.tick(29_999)
+  assert.equal(timeouts, 0)
+
+  clock.tick(1)
+  assert.equal(timeouts, 1)
 })

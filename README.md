@@ -56,12 +56,14 @@ the demo remains an independent lazy-loaded bundle.
 | Stage | Duration | What happens |
 | --- | --- | --- |
 | `logo` | 2000 ms | The exact transparent SVG mark sits centred on the cream background |
-| `video` | 4000 ms | A 300 ms crossfade reveals muted local drone footage and the mark |
+| `video` | full film | A 300 ms crossfade reveals the muted local film from start to finish |
 | `demo` | ongoing | The terrain or its loading/error surface takes over |
 
 The film-to-demo handoff lasts 600 ms and is a transition rather than another stage.
 
-The film is a muted local MP4 without playback controls. `Escape` jumps to the handoff.
+During successful playback, the film starts at `0:00` after the logo and hands off when
+it ends. It is a muted local MP4 without playback controls; `Escape` still skips to the
+handoff, and a media error or 30-second loss of playback progress falls back to the demo.
 
 The production mark is `public/brand/airtriage-logo.svg`. It contains vector paths and
 no background or embedded raster. The supplied JPG is retained only as

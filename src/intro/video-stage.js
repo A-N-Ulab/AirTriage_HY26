@@ -13,7 +13,6 @@ export function createVideoStage({ logoUrl = '' } = {}) {
         <video
           class="intro__video"
           src="/video/RYSY_demo_20s_dopracowany.mp4"
-          autoplay
           muted
           playsinline
           preload="auto"

@@ -112,17 +112,36 @@ test('plays the local film without controls and keeps the AirTriage lockup', asy
       muted: element.muted,
       playsInline: element.playsInline,
     })),
-  ).toEqual({ autoplay: true, controls: false, muted: true, playsInline: true })
+  ).toEqual({ autoplay: false, controls: false, muted: true, playsInline: true })
   await expect.poll(() => video.evaluate((element) => element.videoWidth)).toBeGreaterThan(0)
-  await expect.poll(() => video.evaluate((element) => element.currentTime)).toBeGreaterThan(0)
 
   await expect(page.locator('.intro__skip, .intro__tap, .intro__progress')).toHaveCount(0)
   await expect(intro).toHaveAttribute('data-phase', 'video', { timeout: 2500 })
+  const startTime = await video.evaluate((element) => element.currentTime)
+  expect(startTime).toBeLessThan(1)
+  await expect.poll(() => video.evaluate((element) => element.currentTime)).toBeGreaterThan(
+    startTime,
+  )
   await expect(page.locator('.intro__lockup-logo')).toBeVisible()
   await expect(page.locator('.intro__lockup-logo')).toHaveAttribute(
     'src',
     '/brand/airtriage-logo.svg',
   )
+
+  await video.evaluate((element) => {
+    element.currentTime = Math.max(0, element.duration - 0.1)
+  })
+  await expect(intro).toHaveAttribute('data-phase', 'handoff', { timeout: 3000 })
+})
+
+test('hands off when the local film cannot play', async ({ page }) => {
+  await page.route('**/video/RYSY_demo_20s_dopracowany.mp4', (route) => route.abort())
+  await page.goto('/')
+
+  const intro = page.locator('.intro')
+  await expect(intro).toHaveAttribute('data-phase', 'logo')
+  await expect(intro).toHaveAttribute('data-phase', 'handoff', { timeout: 5000 })
+  await expect(page.locator('[data-demo-shell]')).toHaveClass(/is-revealed/)
 })
 
 test('renders the terrain at a desktop viewport', async ({ page }) => {

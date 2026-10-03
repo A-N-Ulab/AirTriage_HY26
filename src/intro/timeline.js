@@ -8,7 +8,7 @@ export const PHASE = Object.freeze({
 
 export const STEP_MS = Object.freeze({
   [PHASE.LOGO]: 2000,
-  [PHASE.VIDEO]: 4000,
+  [PHASE.VIDEO]: null,
   [PHASE.HANDOFF]: 600,
 })
 
@@ -18,8 +18,35 @@ const ORDER = [
   PHASE.HANDOFF,
 ]
 
-const sum = (list) => list.reduce((total, phase) => total + STEP_MS[phase], 0)
-const TOTAL_MS = sum(ORDER)
+export function createPlaybackWatchdog({
+  stallMs = 30_000,
+  clock = {
+    setTimeout: (callback, delay) => setTimeout(callback, delay),
+    clearTimeout: (timer) => clearTimeout(timer),
+  },
+  onTimeout,
+} = {}) {
+  let timer = null
+
+  const destroy = () => {
+    clock.clearTimeout(timer)
+    timer = null
+  }
+
+  const markProgress = () => {
+    destroy()
+    timer = clock.setTimeout(() => {
+      timer = null
+      onTimeout?.()
+    }, stallMs)
+  }
+
+  return {
+    start: markProgress,
+    markProgress,
+    destroy,
+  }
+}
 
 /**
  * Owns the intro timeline and nothing else — no DOM, no video element.
@@ -27,7 +54,6 @@ const TOTAL_MS = sum(ORDER)
  */
 export function createIntroLoader({
   clock = {
-    now: () => performance.now(),
     setTimeout: (callback, delay) => setTimeout(callback, delay),
     clearTimeout: (timer) => clearTimeout(timer),
   },
@@ -35,22 +61,15 @@ export function createIntroLoader({
 } = {}) {
   let phase = PHASE.IDLE
   let cursor = -1
-  let spentMs = 0
-  let enteredAt = 0
   let stepTimer = null
   let resolveDone
   const done = new Promise((resolve) => {
     resolveDone = resolve
   })
 
-  const elapsedMs = () =>
-    phase === PHASE.DONE
-      ? TOTAL_MS
-      : spentMs + (clock.now() - enteredAt)
-
   const emit = () => {
     if (typeof onChange === 'function') {
-      onChange({ phase, progress: Math.min(elapsedMs() / TOTAL_MS, 1) })
+      onChange({ phase })
     }
   }
 
@@ -60,7 +79,6 @@ export function createIntroLoader({
 
   function finish() {
     if (phase === PHASE.DONE) return
-    spentMs = TOTAL_MS
     phase = PHASE.DONE
     clearTimers()
     emit()
@@ -73,9 +91,9 @@ export function createIntroLoader({
     clock.clearTimeout(stepTimer)
     phase = next
     cursor = ORDER.indexOf(next)
-    enteredAt = clock.now()
     emit()
-    stepTimer = clock.setTimeout(advance, STEP_MS[next])
+    const duration = STEP_MS[next]
+    stepTimer = duration === null ? null : clock.setTimeout(advance, duration)
   }
 
   function advance() {
@@ -83,8 +101,12 @@ export function createIntroLoader({
     const next = cursor + 1
     if (next >= ORDER.length) return finish()
 
-    spentMs += STEP_MS[phase]
     enter(ORDER[next])
+  }
+
+  function completeVideo() {
+    if (phase !== PHASE.VIDEO) return
+    advance()
   }
 
   function start() {
@@ -95,8 +117,6 @@ export function createIntroLoader({
 
   function skip() {
     if (phase === PHASE.IDLE || phase === PHASE.DONE || phase === PHASE.HANDOFF) return
-    const target = ORDER.indexOf(PHASE.HANDOFF)
-    spentMs = sum(ORDER.slice(0, target))
     enter(PHASE.HANDOFF)
   }
 
@@ -107,6 +127,7 @@ export function createIntroLoader({
   return {
     start,
     skip,
+    completeVideo,
     destroy,
     done,
     get phase() {
