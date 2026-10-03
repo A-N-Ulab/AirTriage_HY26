@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="268 478.5 153 153" width="153" height="153" role="img" aria-label="AirTriage drone">
+  <!--
+    Square variant of public/brand/favicon.svg, derived from the same artwork.
+    The original drone bbox is 268 530 153 50, so this viewBox is that box
+    widened to a 153x153 square centred on the artwork (centre y 555).
+    The cream plate keeps the mark legible on dark browser tab bars.
+  -->
+  <rect x="268" y="478.5" width="153" height="153" rx="34" fill="#fef2e4"/>
+  <g fill="#355f47" stroke="none">
+    <rect x="311" y="548" width="68" height="24" rx="7"/>
+    <rect x="338" y="570" width="13" height="10"/>
+    <rect x="290" y="538" width="7" height="30" rx="2"/>
+    <rect x="392" y="538" width="7" height="30" rx="2"/>
+    <rect x="284" y="558" width="30" height="9" rx="3"/>
+    <rect x="376" y="558" width="30" height="9" rx="3"/>
+    <rect x="291" y="530" width="5" height="9"/>
+    <rect x="393" y="530" width="5" height="9"/>
+    <rect x="268" y="535" width="52" height="4" rx="2"/>
+    <rect x="369" y="535" width="52" height="4" rx="2"/>
+  </g>
+</svg>

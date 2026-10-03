@@ -2,7 +2,7 @@
 
 AirTriage is a Vite single-page experience with three deliberately independent stages:
 
-1. a two-second SVG logo splash on white;
+1. a two-second SVG logo splash on the cream page background;
 2. a lightweight branded film;
 3. a lazy-loaded Three.js terrain demo that downloads in the background.
 
@@ -28,7 +28,7 @@ src/
 |   |-- index.js            # logo/film coordinator and public playIntro API
 |   |-- timeline.js         # DOM-independent intro state machine
 |   |-- logo-stage.js       # logo-only DOM
-|   |-- logo-stage.css      # white splash and fast crossfade
+|   |-- logo-stage.css      # centred mark and fast crossfade
 |   |-- video-stage.js      # film-only DOM
 |   |-- video-stage.css     # film visibility and crossfade
 |   `-- intro.css           # shared film controls and handoff presentation
@@ -55,7 +55,7 @@ the demo remains an independent lazy-loaded bundle.
 
 | Stage | Duration | What happens |
 | --- | --- | --- |
-| `logo` | 2000 ms | The exact transparent SVG mark sits on pure white |
+| `logo` | 2000 ms | The exact transparent SVG mark sits centred on the cream background |
 | `video` | 4000 ms | A 300 ms crossfade reveals muted drone footage and Skip |
 | `demo` | ongoing | The terrain or its loading/error surface takes over |
 
@@ -67,6 +67,15 @@ handoff. Blocked autoplay displays **Tap to begin** and can never trap the visit
 The production mark is `public/brand/airtriage-logo.svg`. It contains vector paths and
 no background or embedded raster. The supplied JPG is retained only as
 `docs/assets/airtriage-logo-reference.jpg`.
+
+The mark ships on a `1024x411` canvas with the wordmark centred. The splash caps both
+axes (`max-width: min(82vw, 1024px)`, `max-height: 62vh`, `object-fit: contain`) rather
+than sizing on width alone, because a wide canvas sized by width overflows short
+landscape viewports.
+
+Favicon assets live in `public/`: `brand/favicon-square.svg` (tab icon, cream plate so
+the mark stays legible on dark tab bars), `favicon-32.png`, and `apple-touch-icon.png`.
+`brand/favicon.svg` is the original wide drone mark.
 
 ## Background loading and failures
 
