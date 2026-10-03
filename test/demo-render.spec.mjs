@@ -224,6 +224,86 @@ test('keeps the main film paused at its midpoint and scrubs it by dragging', asy
   expect(await video.evaluate((element) => element.paused)).toBe(true)
 })
 
+test('selects the same one of four people from panel and film', async ({ page }) => {
+  await skipIntro(page)
+
+  const overlay = page.locator('[data-operator-overlay]')
+  const cards = page.locator('[data-person-card]')
+  const video = page.locator('[data-scrub-video]')
+
+  await expect(overlay).toBeVisible()
+  await expect(cards).toHaveCount(4)
+  await expect(page.locator('[data-person-id="person-05"]')).toHaveCount(0)
+  await expect(overlay).toHaveAttribute('data-selected-person', 'person-01')
+  await expect(page.locator('[data-person-card="person-01"]')).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  )
+  await expect(page.locator('[data-person-card="person-01"]')).toContainText('118/min')
+  await expect(page.locator('[data-person-card="person-01"]')).toContainText('22/min')
+  await expect(page.locator('[data-person-card="person-01"]')).toContainText('Priorytet żółty')
+
+  const beforeCardClick = await video.evaluate((element) => element.currentTime)
+  await page.locator('[data-person-card="person-04"]').click()
+  await expect(overlay).toHaveAttribute('data-selected-person', 'person-04')
+  await expect(page.locator('[data-person-card="person-04"]')).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  )
+  await expect(page.locator('[data-person-box="person-04"]')).toBeVisible()
+  const afterCardClick = await video.evaluate((element) => element.currentTime)
+  expect(Math.abs(afterCardClick - beforeCardClick)).toBeLessThan(0.01)
+
+  await page.locator('[data-person-target="person-02"]').click()
+  await expect(overlay).toHaveAttribute('data-selected-person', 'person-02')
+  await expect(page.locator('[data-person-card="person-02"]')).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  )
+})
+
+test('operator controls support keyboard selection and outside-frame state', async ({ page }) => {
+  await skipIntro(page)
+
+  const overlay = page.locator('[data-operator-overlay]')
+  const video = page.locator('[data-scrub-video]')
+  const thirdCard = page.locator('[data-person-card="person-03"]')
+
+  await thirdCard.focus()
+  await page.keyboard.press('Enter')
+  await expect(overlay).toHaveAttribute('data-selected-person', 'person-03')
+
+  await page.locator('[data-person-target="person-04"]').focus()
+  await page.keyboard.press('Space')
+  await expect(overlay).toHaveAttribute('data-selected-person', 'person-04')
+
+  await video.evaluate((element) => {
+    element.currentTime = 0
+    element.dispatchEvent(new Event('seeked'))
+  })
+  await expect(page.locator('[data-person-card="person-04"]')).toContainText('Poza kadrem')
+  await expect(page.locator('[data-person-box="person-04"]')).toHaveCount(0)
+})
+
+test('operator overlay shows image and scenario fallbacks without blocking the film', async ({ page }) => {
+  await page.route('**/operator/person-02-green.webp', (route) => route.abort())
+  await skipIntro(page)
+
+  await page.locator('[data-person-card="person-02"]').click()
+  await expect(page.locator('[data-person-image-fallback="person-02"]')).toBeVisible()
+  await expect(page.locator('[data-scrub-video]')).toBeVisible()
+
+  await page.unroute('**/operator/person-02-green.webp')
+  await page.route('**/assets/operator-scenario-*.js', (route) => route.abort())
+  await page.reload()
+  await expect(page.locator('.intro')).toBeAttached()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('[data-operator-status]')).toContainText(
+    'Scenariusz operatora jest niedostępny',
+  )
+  await expect(page.locator('[data-scrub-video]')).toBeVisible()
+})
+
 test('shows text placeholders for example films that will be added later', async ({ page }) => {
   await skipIntro(page)
   await expect(page.locator('#nasze-przyklady .example-card__placeholder')).toHaveCount(2)
@@ -238,6 +318,7 @@ test('keeps the page usable when the interactive film fails', async ({ page }) =
   await skipIntro(page)
 
   await expect(page.locator('.scrub-film__fallback')).toBeVisible()
+  await expect(page.locator('[data-operator-overlay]')).toBeHidden()
   await expect(page.locator('#nasz-wklad')).toBeVisible()
   await expect(page.locator('#algorytm-i-podstawa-naukowa')).toBeVisible()
 })

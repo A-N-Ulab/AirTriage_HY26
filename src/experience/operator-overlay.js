@@ -2,6 +2,112 @@ const PERSON_IDS = ['person-01', 'person-02', 'person-03', 'person-04']
 
 const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value))
 
+const escapeHtml = (value) =>
+  String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;')
+
+const personCardMarkup = (person) => `
+  <button
+    class="operator-card operator-card--${escapeHtml(person.status)}"
+    type="button"
+    data-person-card="${escapeHtml(person.id)}"
+    data-person-id="${escapeHtml(person.id)}"
+    data-operator-interactive
+    aria-expanded="false"
+  >
+    <span class="operator-card__portrait">
+      <img
+        src="${escapeHtml(person.image)}"
+        alt="${escapeHtml(person.imageAlt)}"
+        data-person-image="${escapeHtml(person.id)}"
+      />
+      <span
+        class="operator-card__image-fallback"
+        data-person-image-fallback="${escapeHtml(person.id)}"
+        aria-hidden="true"
+        hidden
+      >${escapeHtml(person.displayName)}</span>
+    </span>
+    <span class="operator-card__summary">
+      <span class="operator-card__eyebrow">${escapeHtml(person.displayName)}</span>
+      <strong>${escapeHtml(person.statusLabel)}</strong>
+      <span class="operator-card__compact-metrics">HR ${person.heartRate} · RR ${person.respiratoryRate}</span>
+    </span>
+    <span class="operator-card__details">
+      <span class="operator-card__condition">${escapeHtml(person.condition)}</span>
+      <span class="operator-card__metrics">
+        <span><small>HR</small><strong>${person.heartRate}/min</strong></span>
+        <span><small>RR</small><strong>${person.respiratoryRate}/min</strong></span>
+      </span>
+      <span class="operator-card__visibility" data-person-visibility="${escapeHtml(person.id)}"></span>
+    </span>
+  </button>
+`
+
+const overlayMarkup = (people) => `
+  <div class="operator-panel" data-operator-panel data-operator-interactive>
+    <div class="operator-panel__heading">
+      <span>Osoby w scenariuszu</span>
+      <strong>4 wskazane</strong>
+    </div>
+    <div class="operator-panel__list" role="list">
+      ${people.map(personCardMarkup).join('')}
+    </div>
+  </div>
+  <svg
+    class="operator-tracking"
+    data-operator-tracking
+    viewBox="0 0 1920 1080"
+    preserveAspectRatio="xMidYMid slice"
+    aria-label="Oznaczenia czterech wskazanych osób na filmie"
+  ></svg>
+  <p class="operator-status" data-operator-status role="status" hidden></p>
+`
+
+const unavailableMarkup = `
+  <p class="operator-status" data-operator-status role="status">
+    Scenariusz operatora jest niedostępny. Film nadal można przeglądać.
+  </p>
+`
+
+const personLayerMarkup = ({ person, box, selected }) => {
+  if (box === null) return ''
+  const { x, y, width, height } = box
+  const centreX = x + width / 2
+  const centreY = y + height / 2
+  const targetWidth = Math.max(width + 36, 110)
+  const targetHeight = Math.max(height + 36, 110)
+  const targetX = centreX - targetWidth / 2
+  const targetY = centreY - targetHeight / 2
+  const marker = selected
+    ? `<rect class="operator-person__box operator-person__box--${person.status}" data-person-box="${person.id}" x="${x}" y="${y}" width="${width}" height="${height}" rx="9" />`
+    : `<circle class="operator-person__pin operator-person__pin--${person.status}" data-person-pin="${person.id}" cx="${centreX}" cy="${centreY}" r="12" />`
+
+  return `
+    <g class="operator-person${selected ? ' is-selected' : ''}" data-person-layer="${person.id}">
+      ${marker}
+      <rect
+        class="operator-person__target"
+        data-person-target="${person.id}"
+        data-person-id="${person.id}"
+        data-operator-interactive
+        x="${targetX}"
+        y="${targetY}"
+        width="${targetWidth}"
+        height="${targetHeight}"
+        rx="18"
+        role="button"
+        tabindex="0"
+        aria-label="Wybierz ${escapeHtml(person.displayName)} na filmie"
+      />
+    </g>
+  `
+}
+
 export async function loadOperatorScenario(
   importScenario = () => import('./operator-scenario.json', { with: { type: 'json' } }),
 ) {
@@ -112,6 +218,29 @@ export function createOperatorOverlay({
   let framePending = false
   let frameHandle = null
   let destroyed = false
+  const hasDom = typeof mount.querySelectorAll === 'function'
+
+  if (hasDom) {
+    mount.innerHTML = validation.ok ? overlayMarkup(scenario.people) : unavailableMarkup
+  }
+
+  const updateImageFallbacks = () => {
+    if (!hasDom || !validation.ok) return
+    for (const image of mount.querySelectorAll('[data-person-image]')) {
+      const showFallback = () => {
+        image.hidden = true
+        const fallback = mount.querySelector(
+          `[data-person-image-fallback="${image.dataset.personImage}"]`,
+        )
+        if (fallback) {
+          fallback.hidden = false
+          fallback.removeAttribute('aria-hidden')
+        }
+      }
+      image.addEventListener('error', showFallback, { once: true })
+      if (image.complete && image.naturalWidth === 0) showFallback()
+    }
+  }
 
   const applyRender = () => {
     framePending = false
@@ -124,6 +253,30 @@ export function createOperatorOverlay({
     mount.dataset.selectedPerson = selectedPersonId
     mount.dataset.personVisible = String(box !== null)
     mount.hidden = surface.dataset.mediaState === 'error'
+
+    if (!hasDom) return
+    mount.dataset.selectedPerson = selectedPersonId
+    for (const card of mount.querySelectorAll('[data-person-card]')) {
+      const selected = card.dataset.personCard === selectedPersonId
+      card.setAttribute('aria-expanded', String(selected))
+      card.classList.toggle('is-selected', selected)
+      const visibility = card.querySelector('[data-person-visibility]')
+      const cardBox = scenario.frames[frameIndex].boxes[card.dataset.personCard]
+      if (visibility) visibility.textContent = selected && cardBox === null ? 'Poza kadrem' : ''
+    }
+
+    const tracking = mount.querySelector('[data-operator-tracking]')
+    if (tracking) {
+      tracking.innerHTML = scenario.people
+        .map((person) =>
+          personLayerMarkup({
+            person,
+            box: normalisedBoxToPixels(scenario.frames[frameIndex].boxes[person.id], scenario.video),
+            selected: person.id === selectedPersonId,
+          }),
+        )
+        .join('')
+    }
   }
 
   const requestRender = () => {
@@ -136,6 +289,26 @@ export function createOperatorOverlay({
     mount.hidden = true
   }
 
+  const personIdFromEvent = (event) =>
+    event.target.closest?.('[data-person-card], [data-person-target]')?.dataset.personId ??
+    event.target.closest?.('[data-person-card]')?.dataset.personCard
+
+  const onPointerDown = (event) => {
+    if (event.target.closest?.('[data-operator-interactive]')) event.stopPropagation()
+  }
+
+  const onClick = (event) => {
+    const personId = personIdFromEvent(event)
+    if (personId) controller.selectPerson(personId)
+  }
+
+  const onKeyDown = (event) => {
+    const target = event.target.closest?.('[data-person-target]')
+    if (!target || (event.key !== 'Enter' && event.key !== ' ')) return
+    event.preventDefault()
+    controller.selectPerson(target.dataset.personId)
+  }
+
   if (!validation.ok) {
     mount.dataset.operatorState = 'unavailable'
   } else {
@@ -145,9 +318,13 @@ export function createOperatorOverlay({
   video.addEventListener('loadedmetadata', requestRender)
   video.addEventListener('seeked', requestRender)
   video.addEventListener('error', onMediaError)
+  mount.addEventListener?.('pointerdown', onPointerDown)
+  mount.addEventListener?.('click', onClick)
+  mount.addEventListener?.('keydown', onKeyDown)
+  updateImageFallbacks()
   requestRender()
 
-  return {
+  const controller = {
     selectPerson(personId) {
       if (!PERSON_IDS.includes(personId) || destroyed) return
       selectedPersonId = personId
@@ -159,9 +336,15 @@ export function createOperatorOverlay({
       video.removeEventListener('loadedmetadata', requestRender)
       video.removeEventListener('seeked', requestRender)
       video.removeEventListener('error', onMediaError)
+      mount.removeEventListener?.('pointerdown', onPointerDown)
+      mount.removeEventListener?.('click', onClick)
+      mount.removeEventListener?.('keydown', onKeyDown)
       if (framePending) cancelFrame(frameHandle)
       framePending = false
       frameHandle = null
+      if (hasDom) mount.replaceChildren()
     },
   }
+
+  return controller
 }

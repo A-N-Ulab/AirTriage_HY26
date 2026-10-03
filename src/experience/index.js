@@ -1,4 +1,5 @@
 import './experience.css'
+import { createOperatorOverlay, loadOperatorScenario } from './operator-overlay.js'
 import { createScrubController } from './scrub-video.js'
 
 const pageMarkup = `
@@ -76,6 +77,11 @@ const pageMarkup = `
               playsinline
               draggable="false"
             ></video>
+            <div
+              class="operator-overlay"
+              data-operator-overlay
+              aria-label="Panel operatora z czterema wskazanymi osobami"
+            ></div>
             <div class="scrub-film__veil" aria-hidden="true"></div>
             <p class="scrub-film__hint">
               <span aria-hidden="true">←</span>
@@ -261,12 +267,21 @@ export async function createExperience({ container, onProgress = () => {} }) {
 
   const video = container.querySelector('[data-scrub-video]')
   const surface = container.querySelector('[data-scrub-surface]')
+  const overlayMount = container.querySelector('[data-operator-overlay]')
   const scrubController = createScrubController({ video, surface })
+  const scenario = await loadOperatorScenario()
+  const operatorOverlay = createOperatorOverlay({
+    video,
+    surface,
+    mount: overlayMount,
+    scenario,
+  })
 
   onProgress({ progress: 92, message: 'Prawie gotowe...' })
 
   return {
     destroy() {
+      operatorOverlay.destroy()
       scrubController.destroy()
       video.removeAttribute('src')
       video.load()
