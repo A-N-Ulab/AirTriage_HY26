@@ -17,7 +17,7 @@ Demo jest ładowane dynamicznie w tle, więc Three.js nie opóźnia logo ani fil
 | Etap | Implementacja | Zachowanie |
 | --- | --- | --- |
 | 1. Logo | `src/intro/logo-stage.js`, `src/intro/logo-stage.css` | Przezroczyste SVG jest wyświetlane przez dokładnie 2000 ms na tle strony (`--bg`, krem `#fef2e4`). Znak jest wyśrodkowany i ma ograniczoną szerokość oraz wysokość, więc nigdy nie wychodzi poza viewport. Następnie znika w szybkim fade 300 ms. |
-| 2. Film | `src/intro/video-stage.js`, `src/intro/video-stage.css`, `src/intro/index.js` | Wideo YouTube jest przygotowywane za logo, potem widoczne przez 4000 ms. Działa Skip, Escape i awaryjne „Tap to begin”. |
+| 2. Film | `src/intro/video-stage.js`, `src/intro/video-stage.css`, `src/intro/index.js` | Wideo YouTube jest przygotowywane za logo, potem widoczne przez 4000 ms. Brak widocznych kontrolek; `Escape` przewija do handoff, a guard autoplay w `timeline.js` zawsze domyka intro. |
 | 3. Demo | `src/demo/`, `src/demo-loader.js` | Lazy-loadowane demo Three.js. Przy wolnym ładowaniu widać postęp, a przy błędzie komunikat i Retry. |
 
 Przejście film → demo trwa 600 ms i jest traktowane jako przejście, nie jako
@@ -45,6 +45,7 @@ public/brand/favicon-square.svg         # kwadratowa ikona z kremową płytką
 public/brand/favicon.svg                # oryginalna szeroka ikona drona
 public/favicon-32.png                   # raster 32x32
 public/apple-touch-icon.png             # raster 180x180
+public/og-image.png                     # 1200x630 Open Graph / Twitter card
 docs/assets/airtriage-logo-reference.jpg # dostarczony raster referencyjny
 public/CNAME                            # domena produkcyjna
 .github/workflows/deploy-pages.yml      # test, build i deployment
@@ -134,7 +135,8 @@ Ważne elementy konfiguracji:
 - Inter ładuje się z Google Fonts.
 - Three.js jest osobnym, dynamicznym chunkiem Vite.
 - Brak filmu, blokada autoplay lub problem WebGL nie może pozostawić pustej strony:
-  istnieją odpowiednio „Tap to begin” oraz ekran błędu z Retry.
+  blokadę autoplay obsługuje guard w `timeline.js`, który wpuszcza intro do końca, a
+  problem WebGL pokazuje ekran błędu z Retry.
 
 ## Zasada aktualizacji tego pliku
 

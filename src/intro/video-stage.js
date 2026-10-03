@@ -1,6 +1,10 @@
 import './video-stage.css'
 
-export function createVideoStage() {
+/**
+ * Film-stage DOM only. The corner lockup renders the brand mark, whose URL is
+ * injected by the coordinator so this module never references the logo asset.
+ */
+export function createVideoStage({ logoUrl = '' } = {}) {
   const stage = document.createElement('section')
   stage.className = 'intro-film'
   stage.innerHTML = `
@@ -20,15 +24,14 @@ export function createVideoStage() {
     <div class="intro__scrim" aria-hidden="true"></div>
 
     <div class="intro__lockup" aria-hidden="true">
-      <span class="intro__accent intro__accent--lockup"></span>
-      <span class="intro__name">AirTriage</span>
+      <img
+        class="intro__lockup-logo"
+        src="${logoUrl}"
+        alt=""
+        width="1024"
+        height="411"
+      />
     </div>
-
-    <button class="intro__skip" type="button">
-      Skip <span aria-hidden="true">&rarr;</span>
-    </button>
-
-    <button class="intro__tap" type="button">Tap to begin</button>
 
     <div class="intro__progress" role="presentation">
       <i class="intro__progress-bar"></i>
