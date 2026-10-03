@@ -73,6 +73,10 @@
 
 /* ---------------------------------------------------------------- scrim -- */
 
+/*
+ * A cream wash rather than a dark one: it keeps the green lockup legible over
+ * the footage and lets the video dissolve into the page background seamlessly.
+ */
 .intro__scrim {
   position: absolute;
   inset: 0;
@@ -82,12 +86,16 @@
   background:
     linear-gradient(
       to top,
-      rgba(4, 7, 15, 0.94) 0%,
-      rgba(4, 7, 15, 0.55) 22%,
-      rgba(4, 7, 15, 0.12) 48%,
-      rgba(4, 7, 15, 0) 70%
+      var(--bg-a96) 0%,
+      rgba(254, 242, 228, 0.74) 16%,
+      rgba(254, 242, 228, 0.24) 40%,
+      rgba(254, 242, 228, 0) 62%
     ),
-    radial-gradient(120% 80% at 50% 50%, rgba(4, 7, 15, 0) 38%, rgba(4, 7, 15, 0.5) 100%);
+    radial-gradient(
+      120% 78% at 50% 44%,
+      rgba(254, 242, 228, 0) 46%,
+      rgba(254, 242, 228, 0.5) 100%
+    );
 }
 
 /* ------------------------------------------------------------ wordmark -- */
@@ -114,11 +122,12 @@
 .intro__wordmark {
   display: flex;
   margin: 0;
-  font-size: clamp(3.2rem, 11vw, 9rem);
-  font-weight: 700;
+  font-family: var(--font-title);
+  font-size: clamp(3rem, 10.5vw, 8.5rem);
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: -0.02em;
-  text-shadow: 0 12px 44px rgba(6, 23, 60, 0.7);
+  letter-spacing: 0.02em;
+  color: var(--primary);
 }
 
 .intro__wordmark span {
@@ -144,12 +153,8 @@
   display: block;
   width: clamp(80px, 20vw, 240px);
   height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--brand-yellow),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  opacity: 0.55;
   transform: scaleX(0);
   animation: intro-accent 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
   animation-delay: 0.45s;
@@ -185,10 +190,12 @@
 }
 
 .intro__name {
+  font-family: var(--font-title);
   font-size: clamp(0.95rem, 1.6vw, 1.25rem);
   font-weight: 600;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
+  color: var(--primary);
 }
 
 /* ------------------------------------------------------------ controls -- */
@@ -198,17 +205,24 @@
   position: absolute;
   z-index: 6;
   appearance: none;
-  font: inherit;
-  color: var(--brand-white);
-  background: rgba(4, 7, 15, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--primary);
+  background: var(--bg-a55);
+  border: 1px solid var(--primary-a30);
   border-radius: 999px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   cursor: pointer;
   pointer-events: auto;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    visibility 0.4s;
 }
 
 .intro__skip {
@@ -218,11 +232,6 @@
   font-size: 0.78rem;
   opacity: 0;
   transform: translateY(-8px);
-  transition:
-    opacity 0.5s ease,
-    transform 0.5s ease,
-    background 0.2s ease,
-    border-color 0.2s ease;
 }
 
 .intro__tap {
@@ -249,13 +258,13 @@
 
 .intro__skip:hover,
 .intro__tap:hover {
-  background: rgba(4, 7, 15, 0.52);
-  border-color: rgba(255, 255, 255, 0.55);
+  background: rgba(254, 242, 228, 0.85);
+  border-color: var(--primary);
 }
 
 .intro__skip:focus-visible,
 .intro__tap:focus-visible {
-  outline: 2px solid var(--brand-yellow);
+  outline: 2px solid var(--primary);
   outline-offset: 3px;
 }
 
@@ -268,14 +277,14 @@
   bottom: 0;
   z-index: 7;
   height: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--primary-a12);
 }
 
 .intro__progress-bar {
   display: block;
   width: 100%;
   height: 100%;
-  background: var(--brand-yellow);
+  background: var(--primary);
   transform: scaleX(0);
   transform-origin: left center;
 }

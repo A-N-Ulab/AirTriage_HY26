@@ -1,14 +1,38 @@
-:root {
-  --brand-blue: #0c3078;
-  --brand-blue-deep: #06173c;
-  --brand-ink: #04070f;
-  --brand-yellow: #fccc00;
-  --brand-white: #ffffff;
-  --brand-muted: #93a6cc;
+/*
+ * HK Modular is a paid licence from Hanken Design Co and has no public CDN.
+ * This declaration picks up a locally installed copy; to self-host, drop the
+ * licensed webfont into public/fonts/ and add it as a src, e.g.
+ *
+ *   src: url('/fonts/HKModular.woff2') format('woff2'),
+ *
+ * Until then the --font-title stack falls back to Inter.
+ */
+@font-face {
+  font-family: 'HK Modular';
+  src: local('HK Modular');
+  font-weight: 100 900;
+  font-display: swap;
+}
 
-  font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
-  color: var(--brand-white);
-  background: var(--brand-ink);
+:root {
+  /* design tokens */
+  --bg: #fef2e4;
+  --primary: #355f47;
+  --secondary: #5d7065;
+
+  --font-title: 'HK Modular', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* derived, for effects that need the tokens at low alpha */
+  --primary-a12: rgba(53, 95, 71, 0.12);
+  --primary-a30: rgba(53, 95, 71, 0.3);
+  --bg-a55: rgba(254, 242, 228, 0.55);
+  --bg-a96: rgba(254, 242, 228, 0.96);
+
+  font-family: var(--font-body);
+  color: var(--primary);
+  background: var(--bg);
+  color-scheme: light;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -28,10 +52,10 @@ body {
   min-height: 100vh;
   background:
     radial-gradient(
-      120% 90% at 50% 8%,
-      var(--brand-blue) 0%,
-      var(--brand-blue-deep) 42%,
-      var(--brand-ink) 100%
+      120% 100% at 50% 0%,
+      #fff8ee 0%,
+      var(--bg) 45%,
+      #f7e8d6 100%
     );
   background-attachment: fixed;
 }
@@ -62,12 +86,13 @@ body {
    * narrow screens instead of wrapping.
    */
   max-width: 100%;
-  font-size: clamp(1.9rem, 6.4vw, 5.4rem);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: 0.08em;
+  font-family: var(--font-title);
+  font-size: clamp(1.8rem, 6vw, 5.2rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  text-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  color: var(--primary);
 }
 
 .coming-soon__rule {
@@ -77,9 +102,10 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    var(--brand-yellow),
+    var(--primary) 50%,
     transparent
   );
+  opacity: 0.55;
   transform: scaleX(0);
   transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
@@ -87,13 +113,14 @@ body {
 /*
  * Entrance is only armed when JS is running (see the inline script in
  * index.html), so a no-JS visitor still sees the message.
+ *
+ * Deliberately no transition on the hidden state: before the stylesheet lands
+ * the heading is briefly visible, and transitioning to opacity 0 would ghost it
+ * behind the intro instead of hiding it outright. Only the reveal animates.
  */
 .js .coming-soon__title {
   opacity: 0;
   transform: scale(0.96);
-  transition:
-    opacity 0.7s ease,
-    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .js .coming-soon__rule {
@@ -103,6 +130,9 @@ body {
 .js .coming-soon.is-revealed .coming-soon__title {
   opacity: 1;
   transform: none;
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .js .coming-soon.is-revealed .coming-soon__rule {
@@ -111,8 +141,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .js .coming-soon__title {
-    transform: none;
+  .js .coming-soon.is-revealed .coming-soon__title {
     transition: opacity 0.4s linear;
   }
 }

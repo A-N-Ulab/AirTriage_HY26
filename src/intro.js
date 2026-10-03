@@ -163,7 +163,6 @@ export function playIntro({ revealTarget } = {}) {
   window.addEventListener('keydown', onKeyDown)
 
   iframe.src = embedSrc()
-  revealTarget?.classList.add('is-armed')
 
   loader.done.then(() => {
     overlay.dataset.leaving = 'true'
