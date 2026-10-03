@@ -18,6 +18,9 @@ test-results
 tools/operator-tracking/source/
 tools/operator-tracking/frames/
 tools/operator-tracking/contact-sheet*.jpg
+tools/operator-tracking/cluster-*.jpg
+tools/operator-tracking/frame-*.jpg
+tools/operator-tracking/frame-grid-*.jpg
 tools/operator-tracking/operator-preview.mp4
 
 # Editor directories and files
