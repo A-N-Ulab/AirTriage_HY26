@@ -366,8 +366,8 @@
 .evidence-section__heading p,
 .science-scope > p:first-child {
   margin: 0;
-  color: rgba(254, 242, 228, 0.64);
-  font-size: 0.68rem;
+  color: rgba(254, 242, 228, 0.72);
+  font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -415,20 +415,20 @@
 
 .algorithm-flow__number,
 .evidence-source__index {
-  color: rgba(254, 242, 228, 0.56);
-  font-size: 0.66rem;
+  color: rgba(254, 242, 228, 0.68);
+  font-size: 0.76rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .algorithm-flow strong {
-  font-size: 1rem;
+  font-size: 1.12rem;
   line-height: 1.3;
 }
 
 .algorithm-flow li > span:last-child {
-  color: rgba(254, 242, 228, 0.72);
-  font-size: 0.85rem;
+  color: rgba(254, 242, 228, 0.82);
+  font-size: 1rem;
   line-height: 1.6;
 }
 
@@ -460,7 +460,7 @@
 
 .algorithm-outcome__status {
   margin: 0 0 clamp(0.9rem, 2vw, 1.5rem);
-  font-size: 0.66rem;
+  font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -477,15 +477,15 @@
 
 .algorithm-outcome > p:last-child {
   margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.55;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .algorithm-panel__note {
   max-width: 68ch;
   margin: 1.4rem 0 0;
-  color: rgba(254, 242, 228, 0.66);
-  font-size: 0.75rem;
+  color: rgba(254, 242, 228, 0.78);
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 
@@ -516,8 +516,8 @@
 
 .evidence-source > p:not(.evidence-source__index) {
   margin: 0 0 1.5rem;
-  color: rgba(254, 242, 228, 0.74);
-  font-size: 0.84rem;
+  color: rgba(254, 242, 228, 0.82);
+  font-size: 1rem;
   line-height: 1.65;
 }
 
@@ -525,7 +525,7 @@
   align-self: flex-start;
   margin-top: auto;
   color: var(--bg);
-  font-size: 0.72rem;
+  font-size: 0.88rem;
   font-weight: 600;
   line-height: 1.4;
   text-underline-offset: 0.25rem;
@@ -547,7 +547,8 @@
 .science-scope > p:last-child {
   max-width: 62ch;
   margin: 0;
-  color: rgba(254, 242, 228, 0.78);
+  color: rgba(254, 242, 228, 0.82);
+  font-size: 1rem;
   line-height: 1.65;
 }
 
