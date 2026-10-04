@@ -4,7 +4,7 @@ const INTRO_CAPTIONS = [
   { start: 0, number: '01', text: 'Zidentyfikowanie osoby poszkodowanej' },
   { start: 5, number: '02', text: 'Test kamerą termowizyjną' },
   { start: 7, number: '03', text: 'Test kamerą na podczerwień' },
-  { start: 11, number: '04', text: 'Skanowanie grupy ludzi' },
+  { start: 11, number: '04', text: 'Skanowanie otoczenia' },
 ]
 
 const captionAtTime = (currentTime) => {
