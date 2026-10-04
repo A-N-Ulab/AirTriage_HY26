@@ -1,10 +1,10 @@
 import './video-stage.css'
 
 const INTRO_CAPTIONS = [
-  { start: 0, number: '01', text: 'Lorem ipsum dolor sit amet.' },
-  { start: 5, number: '02', text: 'Consectetur adipiscing elit.' },
-  { start: 7, number: '03', text: 'Sed do eiusmod tempor incididunt.' },
-  { start: 11, number: '04', text: 'Ut labore et dolore magna aliqua.' },
+  { start: 0, number: '01', text: 'Zidentyfikowanie osoby poszkodowanej' },
+  { start: 5, number: '02', text: 'Test kamerą termowizyjną' },
+  { start: 7, number: '03', text: 'Test kamerą na podczerwień' },
+  { start: 11, number: '04', text: 'Skanowanie grupy ludzi' },
 ]
 
 const captionAtTime = (currentTime) => {
