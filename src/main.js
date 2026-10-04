@@ -10,9 +10,15 @@ const progress = document.querySelector('[data-demo-progress]')
 const retry = document.querySelector('[data-demo-retry]')
 
 if (shell && mount && title && message && progress && retry) {
+  let allowInteractiveVideoLoad
+  const interactiveVideoLoadGate = new Promise((resolve) => {
+    allowInteractiveVideoLoad = resolve
+  })
+
   const loader = createDemoLoader({
     importDemo: () => import('./experience/index.js'),
     container: mount,
+    experienceOptions: { videoLoadGate: interactiveVideoLoadGate },
     onState: (state) => {
       shell.dataset.state = state.status
       shell.setAttribute('aria-busy', String(state.status === 'loading'))
@@ -36,7 +42,11 @@ if (shell && mount && title && message && progress && retry) {
 
   bindRetry(retry, () => window.location.reload())
 
-  playIntro({ revealTarget: shell }).catch((error) => {
+  playIntro({
+    revealTarget: shell,
+    onVideoBuffered: allowInteractiveVideoLoad,
+  }).catch((error) => {
+    allowInteractiveVideoLoad()
     shell.classList.add('is-revealed')
     console.error('[intro] failed:', error)
   })

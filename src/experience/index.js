@@ -72,8 +72,8 @@ const pageMarkup = `
             <video
               class="scrub-film__video"
               data-scrub-video
-              src="/video/film_2.mp4"
-              preload="auto"
+              data-video-src="/video/film_2.mp4"
+              preload="none"
               muted
               playsinline
               draggable="false"
@@ -260,7 +260,11 @@ const pageMarkup = `
   </article>
 `
 
-export async function createExperience({ container, onProgress = () => {} }) {
+export async function createExperience({
+  container,
+  onProgress = () => {},
+  videoLoadGate = Promise.resolve(),
+}) {
   if (!(container instanceof HTMLElement)) {
     throw new TypeError('A valid experience container is required')
   }
@@ -279,11 +283,21 @@ export async function createExperience({ container, onProgress = () => {} }) {
     mount: overlayMount,
     scenario,
   })
+  let destroyed = false
+
+  const startVideoLoad = () => {
+    if (destroyed || video.src) return
+    video.src = video.dataset.videoSrc
+    video.load()
+  }
+
+  Promise.resolve(videoLoadGate).then(startVideoLoad, startVideoLoad)
 
   onProgress({ progress: 92, message: 'Prawie gotowe...' })
 
   return {
     destroy() {
+      destroyed = true
       operatorOverlay.destroy()
       scrubController.destroy()
       video.removeAttribute('src')

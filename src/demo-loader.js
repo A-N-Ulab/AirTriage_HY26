@@ -1,6 +1,11 @@
 const clampProgress = (value) => Math.min(100, Math.max(0, value))
 
-export function createDemoLoader({ importDemo, container, onState = () => {} }) {
+export function createDemoLoader({
+  importDemo,
+  container,
+  experienceOptions = {},
+  onState = () => {},
+}) {
   let progress = 0
   let currentLoad = null
 
@@ -31,6 +36,7 @@ export function createDemoLoader({ importDemo, container, onState = () => {} }) 
 
         const createRuntime = demoModule.createExperience ?? demoModule.createDemo
         const controller = await createRuntime({
+          ...experienceOptions,
           container,
           onError: reportRuntimeError,
           onProgress: ({ progress: nextProgress, message }) => {

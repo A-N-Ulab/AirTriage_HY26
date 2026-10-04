@@ -10,7 +10,7 @@ const LOGO_ASSET_PATH = '/brand/airtriage-logo.svg'
 const reducedMotion = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export function playIntro({ revealTarget } = {}) {
+export function playIntro({ revealTarget, onVideoBuffered = () => {} } = {}) {
   document.documentElement.classList.add('intro-active')
   const overlay = document.createElement('div')
   overlay.className = 'intro'
@@ -22,6 +22,31 @@ export function playIntro({ revealTarget } = {}) {
   )
   document.body.append(overlay)
   const video = overlay.querySelector('.intro__video')
+  let backgroundLoadReleased = false
+
+  const releaseBackgroundLoad = () => {
+    if (backgroundLoadReleased) return
+    backgroundLoadReleased = true
+    onVideoBuffered()
+  }
+
+  const releaseWhenBuffered = () => {
+    if (video.readyState >= 4) {
+      releaseBackgroundLoad()
+      return
+    }
+
+    if (!Number.isFinite(video.duration) || video.duration <= 0) return
+    for (let index = 0; index < video.buffered.length; index += 1) {
+      const coversWholeFilm =
+        video.buffered.start(index) <= 0.25 &&
+        video.buffered.end(index) >= video.duration - 0.25
+      if (coversWholeFilm) {
+        releaseBackgroundLoad()
+        return
+      }
+    }
+  }
 
   const loader = createIntroLoader({
     onChange: ({ phase }) => {
@@ -35,6 +60,7 @@ export function playIntro({ revealTarget } = {}) {
 
       if (phase === PHASE.HANDOFF) {
         watchdog.destroy()
+        releaseBackgroundLoad()
         revealTarget?.classList.add('is-revealed')
       }
     },
@@ -49,6 +75,11 @@ export function playIntro({ revealTarget } = {}) {
     loader.completeVideo()
   }
 
+  const onVideoError = () => {
+    releaseBackgroundLoad()
+    onVideoFinished()
+  }
+
   const onVideoPlaying = () => {
     overlay.dataset.videoReady = 'true'
     watchdog.markProgress()
@@ -61,8 +92,10 @@ export function playIntro({ revealTarget } = {}) {
   const teardown = () => {
     window.removeEventListener('keydown', onKeyDown)
     video.removeEventListener('ended', onVideoFinished)
-    video.removeEventListener('error', onVideoFinished)
+    video.removeEventListener('error', onVideoError)
     video.removeEventListener('playing', onVideoPlaying)
+    video.removeEventListener('canplaythrough', releaseBackgroundLoad)
+    video.removeEventListener('progress', releaseWhenBuffered)
     video.removeEventListener('timeupdate', watchdog.markProgress)
     watchdog.destroy()
     loader.destroy()
@@ -75,8 +108,10 @@ export function playIntro({ revealTarget } = {}) {
   }
 
   video.addEventListener('ended', onVideoFinished)
-  video.addEventListener('error', onVideoFinished)
+  video.addEventListener('error', onVideoError)
   video.addEventListener('playing', onVideoPlaying)
+  video.addEventListener('canplaythrough', releaseBackgroundLoad)
+  video.addEventListener('progress', releaseWhenBuffered)
   video.addEventListener('timeupdate', watchdog.markProgress)
   window.addEventListener('keydown', onKeyDown)
 

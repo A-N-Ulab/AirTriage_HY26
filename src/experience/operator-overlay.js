@@ -109,7 +109,7 @@ const personLayerMarkup = ({ person, box, selected, targetMinimum }) => {
 }
 
 export async function loadOperatorScenario(
-  importScenario = () => import('./operator-scenario.json', { with: { type: 'json' } }),
+  importScenario = () => import('./operator-scenario.json'),
 ) {
   try {
     const scenarioModule = await importScenario()

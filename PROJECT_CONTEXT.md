@@ -49,8 +49,12 @@ public/CNAME                            # domena produkcyjna
 - Intro nie importuje `src/experience/`.
 - `src/main.js` wykonuje dynamiczny import `src/experience/index.js` po
   pierwszej klatce lub w czasie bezczynności przeglądarki.
+- `src/main.js` przekazuje stronie bramkę ładowania filmu. `film_2.mp4` nie ma
+  przypisanego `src`, dopóki intro nie zgłosi `canplaythrough`, nie zostanie
+  w pełni zbuforowane albo nie przejdzie do etapu handoff.
 - Publiczny kontrakt strony to
-  `createExperience({ container, onProgress })`, zwracający `{ destroy() }`.
+  `createExperience({ container, onProgress, videoLoadGate })`, zwracający
+  `{ destroy() }`.
 - `src/experience/scrub-video.js` nie zna struktury całej strony; otrzymuje
   tylko element wideo oraz powierzchnię gestu.
 
@@ -77,6 +81,8 @@ do webowego H.264 z metadanymi na początku pliku i bez nieużywanej ścieżki
 audio. Dzięki temu waży około 14,6 MiB zamiast 43,4 MiB. Przejście logo → film
 jest krótkim, 400-milisekundowym przenikaniem, uruchamianym dopiero po zdarzeniu
 `playing`, więc logo nie znika przed pierwszą gotową klatką na wolnym łączu.
+Główne bloki strony używają wspólnego, wycentrowanego kontenera o maksymalnej
+szerokości 72 rem, bez wcześniejszego dodatkowego wcięcia od lewej.
 
 ## Widok operatora
 

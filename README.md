@@ -8,6 +8,9 @@ AirTriage is a Vite single-page experience with three independent parts:
 
 The intro hands off without a page reload. `Escape`, an intro-media error, or a
 30-second playback stall still reveals the page.
+The intro film starts buffering immediately and keeps exclusive media bandwidth
+until the browser reports that it can play through. Only then does the page film
+receive its `src`; skipping or failing the intro releases it immediately.
 
 ## Post-intro page
 
@@ -60,7 +63,7 @@ The intro never imports the page. `src/main.js` dynamically imports
 contract is:
 
 ```js
-createExperience({ container, onProgress })
+createExperience({ container, onProgress, videoLoadGate })
 ```
 
 It returns a `{ destroy() }` controller.

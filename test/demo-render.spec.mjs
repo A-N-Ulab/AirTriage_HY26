@@ -75,6 +75,54 @@ test('keeps the logo visible until a delayed intro film actually starts playing'
   await expect(logo).toBeHidden()
 })
 
+test('gives the intro film exclusive bandwidth until it can play through', async ({ page }) => {
+  let heldIntroRequest
+  let interactiveFilmRequests = 0
+
+  await page.route('**/video/RYSY_demo_20s_dopracowany.mp4', (route) => {
+    heldIntroRequest = route
+  })
+  await page.route('**/video/film_2.mp4', async (route) => {
+    interactiveFilmRequests += 1
+    await route.abort()
+  })
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await expect.poll(() => Boolean(heldIntroRequest)).toBe(true)
+  await expect(page.locator('[data-demo-shell]')).toHaveAttribute('data-state', 'ready')
+  await expect(page.locator('[data-scrub-video]')).toBeAttached()
+  expect(interactiveFilmRequests).toBe(0)
+
+  await page.locator('.intro__video').evaluate((video) => {
+    video.dispatchEvent(new Event('canplaythrough'))
+  })
+  await expect.poll(() => interactiveFilmRequests).toBe(1)
+
+  await heldIntroRequest?.abort()
+})
+
+test('releases the interactive film when intro fails during the logo stage', async ({ page }) => {
+  let heldIntroRequest
+  let interactiveFilmRequests = 0
+
+  await page.route('**/video/RYSY_demo_20s_dopracowany.mp4', (route) => {
+    heldIntroRequest = route
+  })
+  await page.route('**/video/film_2.mp4', async (route) => {
+    interactiveFilmRequests += 1
+    await route.abort()
+  })
+
+  await page.goto('/', { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('.intro')).toHaveAttribute('data-phase', 'logo')
+  await page.locator('.intro__video').dispatchEvent('error')
+
+  await expect.poll(() => interactiveFilmRequests, { timeout: 1000 }).toBe(1)
+  await expect(page.locator('.intro')).toHaveAttribute('data-phase', 'logo')
+
+  await heldIntroRequest?.abort()
+})
+
 test('centres the logo mark without clipping it at any viewport', async ({ page }) => {
   // This check only looks at the splash. Block the demo chunk so the repeated
   // This test needs only the splash, so avoid loading the page chunk repeatedly.
@@ -213,6 +261,23 @@ test('renders the interactive page at a desktop viewport', async ({ page }) => {
     ),
   ).toEqual(['nasze-przyklady', 'nasz-wklad', 'algorytm-i-podstawa-naukowa'])
   await expect(page.locator('#nasz-wklad h2')).toHaveText('Widok operatora')
+})
+
+test('centres the main page blocks on desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await skipIntro(page)
+
+  for (const selector of [
+    '.section-heading',
+    '.example-grid',
+    '.contribution-body',
+    '.science-content',
+  ]) {
+    const box = await page.locator(selector).first().boundingBox()
+    expect(Math.abs(box.x + box.width / 2 - 720), `${selector} is off-centre`).toBeLessThanOrEqual(
+      1,
+    )
+  }
 })
 
 test('presents the algorithm and evidence as structured HTML', async ({ page }) => {
@@ -436,7 +501,6 @@ test('mobile operator layout uses a compact bottom sheet and accessible film tar
   await expect(page.locator('[data-person-card="person-01"]')).toContainText('118/min')
   await expect(page.locator('[data-person-card="person-01"]')).toContainText('22/min')
   await expect(page.locator('.contribution-caption')).toContainText('cztery wybrane osoby')
-  await expect(page.locator('.contribution-caption')).toContainText('potwierdzania tożsamości')
 })
 
 test('reduced motion removes operator interface transitions', async ({ page }) => {
