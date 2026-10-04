@@ -101,12 +101,6 @@ const pageMarkup = `
               z założeniami triażu i pokazują ostrzeżenia w przypadku sprawdzonych
               parametrów. Podstawy naukowe znajdują się w zakładce Algorytmy.
             </p>
-            <p class="contribution-caption__disclaimer">
-              Widok celowo prezentuje cztery wybrane osoby z większej grupy, aby czytelnie
-              pokazać mechanizm oznaczania, wyboru i rozwijania danych w panelu operatora.
-              Przybliżenia i parametry są przygotowanym scenariuszem demonstracyjnym POC;
-              nie stanowią pomiaru na żywo ani materiału do potwierdzania tożsamości.
-            </p>
           </div>
         </div>
       </section>
