@@ -280,6 +280,34 @@ test('centres the main page blocks on desktop', async ({ page }) => {
   }
 })
 
+test('removes decorative numbers from section headings', async ({ page }) => {
+  await skipIntro(page)
+  await expect(page.locator('.section-heading__index')).toHaveCount(0)
+})
+
+test('centres every main section title across desktop and mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await skipIntro(page)
+
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+    { width: 320, height: 568 },
+  ]) {
+    await page.setViewportSize(viewport)
+    const titles = await page.locator('.section-heading > :is(h1, h2)').all()
+    expect(titles).toHaveLength(3)
+
+    for (const title of titles) {
+      const box = await title.boundingBox()
+      expect(box).not.toBeNull()
+      expect(Math.abs(box.x + box.width / 2 - viewport.width / 2)).toBeLessThanOrEqual(1)
+      expect(box.x).toBeGreaterThanOrEqual(0)
+      expect(box.x + box.width).toBeLessThanOrEqual(viewport.width)
+    }
+  }
+})
+
 test('presents the algorithm and evidence as structured HTML', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await skipIntro(page)

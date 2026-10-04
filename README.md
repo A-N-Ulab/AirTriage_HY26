@@ -103,9 +103,10 @@ site at the domain root, and `public/CNAME` publishes it at:
 
 ## Assets and fonts
 
-- `public/video/RYSY_demo_20s_dopracowany.mp4` — fast-start 1080p intro film
-  optimised to about 14.6 MiB.
-- `public/video/film_2.mp4` — paused, drag-scrubbed page film.
+- `public/video/RYSY_demo_20s_dopracowany.mp4` — fast-start 1600×900 intro
+  film optimised to about 9.5 MiB.
+- `public/video/film_2.mp4` — 1280×720 paused, drag-scrubbed page film,
+  optimised to about 6.8 MiB while retaining 200 ms keyframe spacing.
 - `public/operator/*.webp` — four illustrative operator-panel close-ups.
 - `public/brand/airtriage-logo.svg` — production vector logo.
 - Inter loads from Google Fonts. HK Modular is used locally when licensed and
