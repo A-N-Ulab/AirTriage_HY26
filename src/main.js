@@ -1,6 +1,8 @@
 import './style.css'
+import './i18n/i18n.css'
 import { playIntro } from './intro/index.js'
 import { bindRetry, createDemoLoader } from './demo-loader.js'
+import { applyTranslations, initLanguage, onLanguageChange, t } from './i18n/index.js'
 
 const shell = document.querySelector('[data-demo-shell]')
 const mount = document.querySelector('[data-demo-mount]')
@@ -9,7 +11,16 @@ const message = document.querySelector('[data-demo-message]')
 const progress = document.querySelector('[data-demo-progress]')
 const retry = document.querySelector('[data-demo-retry]')
 
-if (shell && mount && title && message && progress && retry) {
+/**
+ * Language first: the intro cues, the loading copy and the lazy page all render
+ * straight into the requested language, with no visible switch afterwards.
+ */
+async function boot() {
+  await initLanguage()
+
+  applyTranslations(shell)
+  onLanguageChange(() => applyTranslations(shell))
+
   let allowInteractiveVideoLoad
   const interactiveVideoLoadGate = new Promise((resolve) => {
     allowInteractiveVideoLoad = resolve
@@ -19,10 +30,11 @@ if (shell && mount && title && message && progress && retry) {
     importDemo: () => import('./experience/index.js'),
     container: mount,
     experienceOptions: { videoLoadGate: interactiveVideoLoadGate },
+    translate: t,
     onState: (state) => {
       shell.dataset.state = state.status
       shell.setAttribute('aria-busy', String(state.status === 'loading'))
-      title.textContent = state.status === 'error' ? 'Strona niedostępna' : 'Ładowanie strony'
+      title.textContent = state.status === 'error' ? t('shell.errorTitle') : t('shell.loading')
       message.textContent = state.message
       progress.value = state.progress
       progress.textContent = `${Math.round(state.progress)}%`
@@ -49,5 +61,14 @@ if (shell && mount && title && message && progress && retry) {
     allowInteractiveVideoLoad()
     shell.classList.add('is-revealed')
     console.error('[intro] failed:', error)
+  })
+}
+
+if (shell && mount && title && message && progress && retry) {
+  boot().catch((error) => {
+    shell.dataset.state = 'error'
+    title.textContent = t('shell.errorTitle')
+    message.textContent = t('shell.progress.preparing')
+    console.error('[boot] failed:', error)
   })
 }

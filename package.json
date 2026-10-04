@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test test/brand-logo.test.mjs test/demo-loader.test.mjs test/intro-timeline.test.mjs test/module-boundaries.test.mjs test/operator-overlay.test.mjs test/operator-scenario.test.mjs test/scrub-video.test.mjs test/video-asset.test.mjs",
-    "test:render": "playwright test test/demo-render.spec.mjs"
+    "test": "node --test test/brand-logo.test.mjs test/demo-loader.test.mjs test/i18n.test.mjs test/intro-timeline.test.mjs test/module-boundaries.test.mjs test/operator-overlay.test.mjs test/operator-scenario.test.mjs test/scrub-video.test.mjs test/video-asset.test.mjs",
+    "test:render": "playwright test test/demo-render.spec.mjs test/language.spec.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

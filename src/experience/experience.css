@@ -23,6 +23,17 @@
   flex: 0 0 auto;
 }
 
+.experience-header__actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.85rem, 2vw, 1.75rem);
+}
+
+.experience-header__language {
+  display: flex;
+  flex: 0 0 auto;
+}
+
 .experience-header__brand img {
   display: block;
   width: clamp(108px, 12vw, 156px);
@@ -630,9 +641,15 @@
     padding-block: 0.85rem;
   }
 
+  .experience-header__actions {
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
   .experience-tabs {
     justify-content: space-between;
     gap: 0.8rem;
+    min-width: 0;
   }
 
   .experience-tabs a {

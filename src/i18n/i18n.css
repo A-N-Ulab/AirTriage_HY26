@@ -1,0 +1,47 @@
+/* Shared by every stage, so the switch looks the same over the page and film. */
+
+.language-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.25rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.8rem;
+  color: var(--secondary);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--primary-a30);
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.language-toggle:hover {
+  color: var(--primary);
+  background: var(--bg-a55);
+  border-color: var(--primary);
+}
+
+.language-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.language-toggle__code {
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-toggle {
+    transition: none;
+  }
+}

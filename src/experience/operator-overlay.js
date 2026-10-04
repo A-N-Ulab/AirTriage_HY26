@@ -1,6 +1,14 @@
+import { getLanguage, onLanguageChange, t } from '../i18n/index.js'
+
 const PERSON_IDS = ['person-01', 'person-02', 'person-03', 'person-04']
 
 const clamp = (value, minimum, maximum) => Math.min(maximum, Math.max(minimum, value))
+
+/** Polish stays the default; the `*En` scenario fields are additive. */
+const localisedField = (person, field) => {
+  const localised = person[`${field}En`]
+  return getLanguage() === 'en' && typeof localised === 'string' ? localised : person[field]
+}
 
 const escapeHtml = (value) =>
   String(value)
@@ -10,7 +18,10 @@ const escapeHtml = (value) =>
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;')
 
-const personCardMarkup = (person) => `
+const personCardMarkup = (person) => {
+  const displayName = localisedField(person, 'displayName')
+
+  return `
   <button
     class="operator-card operator-card--${escapeHtml(person.status)}"
     type="button"
@@ -22,7 +33,7 @@ const personCardMarkup = (person) => `
     <span class="operator-card__portrait">
       <img
         src="${escapeHtml(person.image)}"
-        alt="${escapeHtml(person.imageAlt)}"
+        alt="${escapeHtml(localisedField(person, 'imageAlt'))}"
         data-person-image="${escapeHtml(person.id)}"
       />
       <span
@@ -30,15 +41,15 @@ const personCardMarkup = (person) => `
         data-person-image-fallback="${escapeHtml(person.id)}"
         aria-hidden="true"
         hidden
-      >${escapeHtml(person.displayName)}</span>
+      >${escapeHtml(displayName)}</span>
     </span>
     <span class="operator-card__summary">
-      <span class="operator-card__eyebrow">${escapeHtml(person.displayName)}</span>
-      <strong>${escapeHtml(person.statusLabel)}</strong>
+      <span class="operator-card__eyebrow">${escapeHtml(displayName)}</span>
+      <strong>${escapeHtml(localisedField(person, 'statusLabel'))}</strong>
       <span class="operator-card__compact-metrics">HR ${person.heartRate} · RR ${person.respiratoryRate}</span>
     </span>
     <span class="operator-card__details">
-      <span class="operator-card__condition">${escapeHtml(person.condition)}</span>
+      <span class="operator-card__condition">${escapeHtml(localisedField(person, 'condition'))}</span>
       <span class="operator-card__metrics">
         <span class="${person.status === 'yellow' ? 'operator-card__metric--warning' : ''}"><small>HR</small><strong>${person.heartRate}/min</strong></span>
         <span><small>RR</small><strong>${person.respiratoryRate}/min</strong></span>
@@ -47,12 +58,13 @@ const personCardMarkup = (person) => `
     </span>
   </button>
 `
+}
 
 const overlayMarkup = (people) => `
   <div class="operator-panel" data-operator-panel data-operator-interactive>
     <div class="operator-panel__heading">
-      <span>Osoby w scenariuszu</span>
-      <strong>4 wskazane</strong>
+      <span>${escapeHtml(t('panel.heading'))}</span>
+      <strong>${escapeHtml(t('panel.count'))}</strong>
     </div>
     <div class="operator-panel__list" role="list">
       ${people.map(personCardMarkup).join('')}
@@ -63,14 +75,14 @@ const overlayMarkup = (people) => `
     data-operator-tracking
     viewBox="0 0 1920 1080"
     preserveAspectRatio="xMidYMid slice"
-    aria-label="Oznaczenia czterech wskazanych osób na filmie"
+    aria-label="${escapeHtml(t('panel.trackingLabel'))}"
   ></svg>
   <p class="operator-status" data-operator-status role="status" hidden></p>
 `
 
 const unavailableMarkup = `
   <p class="operator-status" data-operator-status role="status">
-    Scenariusz operatora jest niedostępny. Film nadal można przeglądać.
+    ${escapeHtml(t('panel.unavailable'))}
   </p>
 `
 
@@ -102,7 +114,7 @@ const personLayerMarkup = ({ person, box, selected, targetMinimum }) => {
         rx="18"
         role="button"
         tabindex="0"
-        aria-label="Wybierz ${escapeHtml(person.displayName)} na filmie"
+        aria-label="${escapeHtml(t('panel.selectOnFilm', { name: localisedField(person, 'displayName') }))}"
       />
     </g>
   `
@@ -220,9 +232,12 @@ export function createOperatorOverlay({
   let destroyed = false
   const hasDom = typeof mount.querySelectorAll === 'function'
 
-  if (hasDom) {
+  const renderPanelLabels = () => {
+    if (!hasDom) return
     mount.innerHTML = validation.ok ? overlayMarkup(scenario.people) : unavailableMarkup
   }
+
+  renderPanelLabels()
 
   const updateImageFallbacks = () => {
     if (!hasDom || !validation.ok) return
@@ -291,7 +306,10 @@ export function createOperatorOverlay({
       card.classList.toggle('is-selected', selected)
       const visibility = card.querySelector('[data-person-visibility]')
       const cardBox = scenario.frames[frameIndex].boxes[card.dataset.personCard]
-      if (visibility) visibility.textContent = selected && cardBox === null ? 'Poza kadrem' : ''
+      if (visibility) {
+        visibility.textContent =
+          selected && cardBox === null ? t('panel.outOfFrame') : ''
+      }
     }
 
     const tracking = mount.querySelector('[data-operator-tracking]')
@@ -357,6 +375,15 @@ export function createOperatorOverlay({
   updateImageFallbacks()
   requestRender()
 
+  // Panel wording comes from the dictionaries, so rebuild it on a switch and
+  // keep the current selection, frame and fallback behaviour intact.
+  const stopLanguageSync = onLanguageChange(() => {
+    if (destroyed) return
+    renderPanelLabels()
+    updateImageFallbacks()
+    requestRender()
+  })
+
   const controller = {
     selectPerson(personId) {
       if (!PERSON_IDS.includes(personId) || destroyed) return
@@ -366,6 +393,7 @@ export function createOperatorOverlay({
     render: requestRender,
     destroy() {
       destroyed = true
+      stopLanguageSync()
       video.removeEventListener('loadedmetadata', requestRender)
       video.removeEventListener('seeked', requestRender)
       video.removeEventListener('error', onMediaError)

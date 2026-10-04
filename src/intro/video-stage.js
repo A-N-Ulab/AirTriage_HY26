@@ -1,15 +1,20 @@
 import './video-stage.css'
+import { onLanguageChange, t } from '../i18n/index.js'
 
-const INTRO_CAPTIONS = [
-  { start: 0, number: '01', text: 'Zidentyfikowanie osoby poszkodowanej' },
-  { start: 5, number: '02', text: 'Test kamerą termowizyjną' },
-  { start: 7, number: '03', text: 'Test kamerą na podczerwień' },
-  { start: 11, number: '04', text: 'Skanowanie otoczenia' },
+/**
+ * Only the timeline lives here; the cue wording comes from the dictionaries so
+ * the film reads in whichever language the visitor arrived with.
+ */
+const INTRO_CUES = [
+  { start: 0, number: '01', key: 'intro.cue.01' },
+  { start: 5, number: '02', key: 'intro.cue.02' },
+  { start: 7, number: '03', key: 'intro.cue.03' },
+  { start: 11, number: '04', key: 'intro.cue.04' },
 ]
 
 const captionAtTime = (currentTime) => {
   const safeTime = Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0
-  return INTRO_CAPTIONS.findLast(({ start }) => start <= safeTime) ?? INTRO_CAPTIONS[0]
+  return INTRO_CUES.findLast(({ start }) => start <= safeTime) ?? INTRO_CUES[0]
 }
 
 /**
@@ -17,7 +22,7 @@ const captionAtTime = (currentTime) => {
  * injected by the coordinator so this module never references the logo asset.
  */
 export function createVideoStage({ logoUrl = '' } = {}) {
-  const initialCaption = INTRO_CAPTIONS[0]
+  const initialCaption = INTRO_CUES[0]
   const stage = document.createElement('section')
   stage.className = 'intro-film'
   stage.innerHTML = `
@@ -51,7 +56,7 @@ export function createVideoStage({ logoUrl = '' } = {}) {
       >
         <span class="intro__caption-inner">
           <span class="intro__caption-number" data-intro-caption-number>${initialCaption.number}</span>
-          <span class="intro__caption-text" data-intro-caption-text>${initialCaption.text}</span>
+          <span class="intro__caption-text" data-intro-caption-text>${t(initialCaption.key)}</span>
         </span>
       </p>
     </div>
@@ -69,8 +74,24 @@ export function updateIntroCaption(stage, currentTime) {
 
   caption.dataset.captionNumber = cue.number
   caption.querySelector('[data-intro-caption-number]').textContent = cue.number
-  caption.querySelector('[data-intro-caption-text]').textContent = cue.text
+  caption.querySelector('[data-intro-caption-text]').textContent = t(cue.key)
   caption.classList.remove('is-changing')
   void caption.offsetWidth
   caption.classList.add('is-changing')
+}
+
+/**
+ * Re-reads the active cue without replaying the entrance animation, so a
+ * language switch mid-intro swaps the wording in place.
+ */
+export function refreshIntroCaptionLanguage(stage, currentTime) {
+  const caption = stage.querySelector('[data-intro-caption]')
+  if (!caption) return
+
+  const cue = captionAtTime(currentTime)
+  caption.querySelector('[data-intro-caption-text]').textContent = t(cue.key)
+}
+
+export function watchIntroCaptionLanguage(stage, getCurrentTime = () => 0) {
+  return onLanguageChange(() => refreshIntroCaptionLanguage(stage, getCurrentTime()))
 }

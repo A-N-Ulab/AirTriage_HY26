@@ -65,10 +65,29 @@
 
         <section class="demo-shell__status" aria-live="polite" aria-atomic="true">
           <p class="demo-shell__eyebrow">AirTriage</p>
-          <h1 class="demo-shell__title" data-demo-title>Ładowanie strony</h1>
-          <p class="demo-shell__message" data-demo-message>Przygotowujemy doświadczenie...</p>
+          <h1
+            class="demo-shell__title"
+            data-demo-title
+            data-i18n="shell.loading"
+          >
+            Ładowanie strony
+          </h1>
+          <p
+            class="demo-shell__message"
+            data-demo-message
+            data-i18n="shell.loadingBody"
+          >
+            Przygotowujemy doświadczenie...
+          </p>
           <progress class="demo-shell__progress" data-demo-progress max="100" value="0">0%</progress>
-          <button class="demo-shell__retry" data-demo-retry type="button">Spróbuj ponownie</button>
+          <button
+            class="demo-shell__retry"
+            data-demo-retry
+            data-i18n="shell.retry"
+            type="button"
+          >
+            Spróbuj ponownie
+          </button>
         </section>
 
         <section class="coming-soon" aria-label="AirTriage coming soon">

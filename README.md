@@ -23,11 +23,11 @@ receive its `src`; skipping or failing the intro releases it immediately.
 - supports mouse, pen, and touch through Pointer Events;
 - shows readable fallback copy if the media cannot load.
 
-The page begins with `Nasze przykłady`, whose two example-film cards use text
-placeholders until their media is supplied. `Widok operatora` follows with the
-interactive film and a four-person operator panel. `Algorytm` then presents the
-POC decision flow, measurement thresholds, limitations, and `Poparcie naukowe`
-as compact semantic HTML.
+The page begins with `Nasze przykłady`, whose two example-film cards show a
+YouTube poster and only load the player on click, from the privacy domain.
+`Widok operatora` follows with the interactive film and a four-person operator
+panel. `Algorytm` then presents the POC decision flow, measurement thresholds,
+limitations, and `Poparcie naukowe` as compact semantic HTML.
 Rapid pointer moves are coalesced and an in-progress seek finishes before the
 latest requested frame is applied, avoiding overlapping decoder work. The MP4
 stores its metadata first and uses keyframes every 200 ms for responsive seeks.
@@ -47,7 +47,8 @@ status, close-up, and position data are static demonstration values.
 src/
 |-- main.js                     # intro and lazy page orchestration
 |-- demo-loader.js              # shared loading/ready/error/retry state
-|-- style.css                   # global tokens and shell presentation
+|-- style.css                   # global tokens, type system and shell
+|-- i18n/                       # Polish/English dictionaries and language runtime
 |-- intro/                      # logo, intro film, and timeline
 `-- experience/
     |-- index.js                # semantic page markup and lifecycle
@@ -67,6 +68,23 @@ createExperience({ container, onProgress, videoLoadGate })
 ```
 
 It returns a `{ destroy() }` controller.
+
+## Languages
+
+Polish is the default and needs no JavaScript: the copy lives inline in the
+markup, and `data-i18n` keys mark what `applyTranslations` swaps. The header
+carries a `PL`/`EN` switch in its top-right corner.
+
+- `?lang=en` boots English; `?lang=pl` forces Polish and overrides a stored
+  choice. Otherwise the last choice from `localStorage` is used, then Polish.
+- Switching updates `?lang=`, `localStorage` and `<html lang>` without a reload.
+- `src/i18n/pl.js` owns the key set and `src/i18n/en.js` must mirror it;
+  `test/i18n.test.mjs` fails on any missing or orphaned key.
+- Polish is bundled with the entry chunk. English is a separate lazy chunk that
+  is only fetched when a visitor actually asks for it.
+- Operator panel wording comes from `*En` fields on
+  `operator-scenario.json`; numeric data (HR, RR, frame boxes) is never
+  translated.
 
 ## Development
 

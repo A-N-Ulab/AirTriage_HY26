@@ -15,6 +15,7 @@ stronę projektu. Strona jest ładowana dynamicznie w tle podczas intro.
 | Logo | `src/intro/logo-stage.js` | Znak AirTriage jest wyśrodkowany na kremowym tle przez 2000 ms. |
 | Film intro | `src/intro/video-stage.js`, `src/intro/index.js` | Film startuje od początku po logo, nie ma kontrolek i pozostaje widoczny aż do `ended`. Escape pomija film, a błąd lub 30 sekund bez postępu uruchamia handoff. |
 | Strona | `src/experience/` | Przewijalna strona: najpierw `Nasze przykłady`, potem `Widok operatora` z interaktywnym panelem czterech osób, a dalej zwięzły `Algorytm` i `Poparcie naukowe`. |
+| Język | `src/i18n/` | Polski jest domyślny, angielski przełączany w prawym górnym rogu nagłówka. |
 
 Timeline intro pozostaje niezależną od DOM maszyną stanów:
 `idle → logo → video → handoff → done`.
@@ -34,6 +35,11 @@ src/experience/experience.css           # responsywny wygląd strony
 src/experience/operator-scenario.json   # statyczne dane 4 osób dla każdej klatki
 src/experience/operator-overlay.js      # synchronizacja panelu i oznaczeń SVG
 src/experience/operator-overlay.css     # panel A3 na desktopie i mobile
+src/i18n/index.js                      # wybór języka, t() i podmiana tekstów
+src/i18n/pl.js                         # słownik polski i wzorzec kluczy
+src/i18n/en.js                         # słownik angielski (lazy chunk)
+src/i18n/language-toggle.js            # wspólny przełącznik PL/EN
+src/i18n/i18n.css                      # wygląd przełącznika
 tools/operator-tracking/                # offline tracking i budowa scenariusza
 public/video/RYSY_demo_20s_dopracowany.mp4 # zoptymalizowany film intro (1080p, ok. 14,6 MiB)
 public/video/film_2.mp4                 # interaktywny film strony
@@ -83,6 +89,26 @@ jest krótkim, 400-milisekundowym przenikaniem, uruchamianym dopiero po zdarzeni
 `playing`, więc logo nie znika przed pierwszą gotową klatką na wolnym łączu.
 Główne bloki strony używają wspólnego, wycentrowanego kontenera o maksymalnej
 szerokości 72 rem, bez wcześniejszego dodatkowego wcięcia od lewej.
+
+## Języki
+
+Polski jest językiem domyślnym i działa bez JavaScriptu: tekst pozostaje
+inline w znacznikach, a klucze `data-i18n` oznaczają to, co podmienia
+`applyTranslations`. Przełącznik `PL`/`EN` siedzi w prawym górnym rogu
+przyklejonego nagłówka strony; w intro go nie ma, bo intro nie ma nagłówka.
+
+Kolejność wyboru języka: `?lang=en` z adresu, potem zapamiętany wybór
+w `localStorage`, na końcu polski. `?lang=pl` wymusza polski mimo zapamiętanego
+angielskiego. Przełączenie bez przeładowania aktualizuje `?lang=`,
+`localStorage` oraz `<html lang>`.
+
+`src/i18n/pl.js` jest wzorcem zbioru kluczy, a `src/i18n/en.js` musi go
+odwzorowywać; `test/i18n.test.mjs` kończy się błędem przy brakującym lub
+osieroconym kluczu. Polski wchodzi do bundla startowego, a angielski jest
+osobnym, leniwym chunkiem pobieranym tylko na żądanie. Panel operatora bierze
+teksty z pól `*En` w `operator-scenario.json`; dane liczbowe (HR, RR, ramki
+klatek) nie są tłumaczone. Progi i jednostki muszą mieć w obu językach te same
+liczby.
 
 ## Widok operatora
 

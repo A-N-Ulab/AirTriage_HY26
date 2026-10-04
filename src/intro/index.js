@@ -1,6 +1,6 @@
 import './intro.css'
 import { createLogoStage } from './logo-stage.js'
-import { createVideoStage, updateIntroCaption } from './video-stage.js'
+import { createVideoStage, updateIntroCaption, watchIntroCaptionLanguage } from './video-stage.js'
 import { PHASE, createIntroLoader, createPlaybackWatchdog } from './timeline.js'
 
 // Owned by the coordinator and injected into both stages, so neither the logo
@@ -92,7 +92,10 @@ export function playIntro({ revealTarget, onVideoBuffered = () => {} } = {}) {
     if (event.key === 'Escape') loader.skip()
   }
 
+  const stopLanguageSync = watchIntroCaptionLanguage(videoStage, () => video.currentTime)
+
   const teardown = () => {
+    stopLanguageSync()
     window.removeEventListener('keydown', onKeyDown)
     video.removeEventListener('ended', onVideoFinished)
     video.removeEventListener('error', onVideoError)
