@@ -42,6 +42,42 @@
   box-sizing: border-box;
 }
 
+/* --------------------------------------------------------- type system -- */
+
+/*
+ * Only two type roles exist, assigned here once so no component inherits a
+ * family by accident:
+ *
+ *   --font-title  headings and display type (h1-h4, section titles)
+ *   --font-body   prose, data and UI labels (everything else)
+ *
+ * Component stylesheets may only override the family for an element that acts
+ * as a heading without being one, e.g. `.algorithm-flow strong`.
+ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-title);
+}
+
+p,
+li,
+dt,
+dd,
+blockquote,
+figcaption,
+small,
+strong,
+em,
+a,
+button,
+label {
+  font-family: var(--font-body);
+}
+
 html,
 body {
   margin: 0;
@@ -121,6 +157,7 @@ html.intro-active body {
   margin: 0;
   font-family: var(--font-title);
   font-size: clamp(2rem, 5vw, 4.75rem);
+  font-weight: 500;
   line-height: 1;
   text-transform: uppercase;
 }
@@ -225,9 +262,8 @@ html.intro-active body {
    * narrow screens instead of wrapping.
    */
   max-width: 100%;
-  font-family: var(--font-title);
   font-size: clamp(1.8rem, 6vw, 5.2rem);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.1;
   letter-spacing: 0.04em;
   text-transform: uppercase;
