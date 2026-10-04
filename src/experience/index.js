@@ -61,6 +61,15 @@ const pageMarkup = `
         </div>
 
         <div class="contribution-body">
+          <div class="contribution-caption">
+            <p class="contribution-caption__text">
+              Widok prezentuje cztery wybrane osoby, aby czytelnie pokazać mechanizm
+              oznaczania, wyboru i rozwijania danych w panelu operatora. Kolory zgodne są
+              z założeniami triażu i pokazują ostrzeżenia w przypadku sprawdzonych
+              parametrów. Podstawy naukowe znajdują się w zakładce Algorytmy.
+            </p>
+          </div>
+
           <div
             class="scrub-film"
             data-scrub-surface
@@ -84,6 +93,7 @@ const pageMarkup = `
               aria-label="Panel operatora z czterema wskazanymi osobami"
             ></div>
             <div class="scrub-film__veil" aria-hidden="true"></div>
+            <p class="scrub-film__badge">Widok poglądowy</p>
             <p class="scrub-film__hint">
               <span aria-hidden="true">←</span>
               Przeciągnij, aby przeanalizować
@@ -91,15 +101,6 @@ const pageMarkup = `
             </p>
             <p class="scrub-film__fallback" role="status">
               Interaktywny film jest chwilowo niedostępny.
-            </p>
-          </div>
-          <div class="contribution-caption">
-            <p class="contribution-caption__label">Interaktywny podgląd</p>
-            <p>
-              Widok prezentuje cztery wybrane osoby, aby czytelnie pokazać mechanizm
-              oznaczania, wyboru i rozwijania danych w panelu operatora. Kolory zgodne są
-              z założeniami triażu i pokazują ostrzeżenia w przypadku sprawdzonych
-              parametrów. Podstawy naukowe znajdują się w zakładce Algorytmy.
             </p>
           </div>
         </div>
