@@ -74,13 +74,13 @@ const unavailableMarkup = `
   </p>
 `
 
-const personLayerMarkup = ({ person, box, selected }) => {
+const personLayerMarkup = ({ person, box, selected, targetMinimum }) => {
   if (box === null) return ''
   const { x, y, width, height } = box
   const centreX = x + width / 2
   const centreY = y + height / 2
-  const targetWidth = Math.max(width + 36, 190)
-  const targetHeight = Math.max(height + 36, 190)
+  const targetWidth = Math.max(width + 36, targetMinimum)
+  const targetHeight = Math.max(height + 36, targetMinimum)
   const targetX = centreX - targetWidth / 2
   const targetY = centreY - targetHeight / 2
   const marker = selected
@@ -242,6 +242,35 @@ export function createOperatorOverlay({
     }
   }
 
+  const trackingScale = (tracking) => {
+    const rect = tracking?.getBoundingClientRect?.()
+    if (!rect?.width || !rect?.height) return 1
+    return Math.max(rect.width / scenario.video.width, rect.height / scenario.video.height)
+  }
+
+  const personIdAtPointer = (event) => {
+    const tracking = event.target.closest?.('[data-operator-tracking]')
+    if (!tracking || !validation.ok) return null
+    return [...tracking.querySelectorAll('[data-person-target]')]
+      .map((target) => {
+        const rect = target.getBoundingClientRect()
+        const centreX = rect.left + rect.width / 2
+        const centreY = rect.top + rect.height / 2
+        if (
+          Math.abs(event.clientX - centreX) > rect.width / 2 ||
+          Math.abs(event.clientY - centreY) > rect.height / 2
+        ) {
+          return null
+        }
+        return {
+          id: target.dataset.personId,
+          distance: (event.clientX - centreX) ** 2 + (event.clientY - centreY) ** 2,
+        }
+      })
+      .filter(Boolean)
+      .sort((left, right) => left.distance - right.distance)[0]?.id ?? null
+  }
+
   const applyRender = () => {
     framePending = false
     frameHandle = null
@@ -267,12 +296,14 @@ export function createOperatorOverlay({
 
     const tracking = mount.querySelector('[data-operator-tracking]')
     if (tracking) {
+      const targetMinimum = 44 / trackingScale(tracking)
       tracking.innerHTML = scenario.people
         .map((person) =>
           personLayerMarkup({
             person,
             box: normalisedBoxToPixels(scenario.frames[frameIndex].boxes[person.id], scenario.video),
             selected: person.id === selectedPersonId,
+            targetMinimum,
           }),
         )
         .join('')
@@ -289,9 +320,11 @@ export function createOperatorOverlay({
     mount.hidden = true
   }
 
-  const personIdFromEvent = (event) =>
-    event.target.closest?.('[data-person-card], [data-person-target]')?.dataset.personId ??
-    event.target.closest?.('[data-person-card]')?.dataset.personCard
+  const personIdFromEvent = (event) => {
+    const card = event.target.closest?.('[data-person-card]')
+    if (card) return card.dataset.personCard
+    return personIdAtPointer(event)
+  }
 
   const onPointerDown = (event) => {
     if (event.target.closest?.('[data-operator-interactive]')) event.stopPropagation()

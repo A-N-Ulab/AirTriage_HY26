@@ -280,12 +280,38 @@ test('selects the same one of four people from panel and film', async ({ page })
   const afterCardClick = await video.evaluate((element) => element.currentTime)
   expect(Math.abs(afterCardClick - beforeCardClick)).toBeLessThan(0.01)
 
-  await page.locator('[data-person-target="person-02"]').click()
+  const clickFilmPerson = async (personId) => {
+    await page.locator('[data-operator-tracking]').evaluate((tracking, id) => {
+      const marker = tracking.querySelector(`[data-person-box="${id}"], [data-person-pin="${id}"]`)
+      const rect = marker.getBoundingClientRect()
+      tracking.dispatchEvent(
+        new MouseEvent('click', {
+          bubbles: true,
+          clientX: rect.left + rect.width / 2,
+          clientY: rect.top + rect.height / 2,
+        }),
+      )
+    }, personId)
+  }
+
+  await clickFilmPerson('person-02')
   await expect(overlay).toHaveAttribute('data-selected-person', 'person-02')
   await expect(page.locator('[data-person-card="person-02"]')).toHaveAttribute(
     'aria-expanded',
     'true',
   )
+
+  for (const frame of [70, 277]) {
+    await video.evaluate((element, time) => {
+      element.currentTime = time
+      element.dispatchEvent(new Event('seeked'))
+    }, frame / 30)
+    await expect(overlay).toHaveAttribute('data-frame', String(frame))
+    for (const personId of ['person-01', 'person-02', 'person-03', 'person-04']) {
+      await clickFilmPerson(personId)
+      await expect(overlay).toHaveAttribute('data-selected-person', personId)
+    }
+  }
 })
 
 test('operator layout keeps the A3 rail and tracking layer aligned with the desktop film', async ({
@@ -326,7 +352,7 @@ test('operator layout keeps the A3 rail and tracking layer aligned with the desk
 test('mobile operator layout uses a compact bottom sheet and accessible film targets', async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 390, height: 844 })
+  await page.setViewportSize({ width: 320, height: 568 })
   await skipIntro(page)
 
   const surface = page.locator('[data-scrub-surface]')
@@ -338,11 +364,15 @@ test('mobile operator layout uses a compact bottom sheet and accessible film tar
   expect(panelBox.height).toBeLessThan(surfaceBox.height * 0.44)
   expect(panelBox.x).toBeGreaterThanOrEqual(surfaceBox.x)
   expect(panelBox.x + panelBox.width).toBeLessThanOrEqual(surfaceBox.x + surfaceBox.width + 1)
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320)
 
   const targetBox = await page.locator('[data-person-target]').first().boundingBox()
   expect(targetBox.width).toBeGreaterThanOrEqual(44)
   expect(targetBox.height).toBeGreaterThanOrEqual(44)
+  await expect(page.locator('[data-person-card="person-01"] .operator-card__condition')).toBeVisible()
+  await expect(page.locator('[data-person-card="person-01"]')).toContainText('Bardzo zmęczona')
+  await expect(page.locator('[data-person-card="person-01"]')).toContainText('118/min')
+  await expect(page.locator('[data-person-card="person-01"]')).toContainText('22/min')
   await expect(page.locator('.contribution-caption')).toContainText('cztery wybrane osoby')
   await expect(page.locator('.contribution-caption')).toContainText('potwierdzania tożsamości')
 })
