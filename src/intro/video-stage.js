@@ -1,10 +1,23 @@
 import './video-stage.css'
 
+const INTRO_CAPTIONS = [
+  { start: 0, number: '01', text: 'Lorem ipsum dolor sit amet.' },
+  { start: 5, number: '02', text: 'Consectetur adipiscing elit.' },
+  { start: 7, number: '03', text: 'Sed do eiusmod tempor incididunt.' },
+  { start: 11, number: '04', text: 'Ut labore et dolore magna aliqua.' },
+]
+
+const captionAtTime = (currentTime) => {
+  const safeTime = Number.isFinite(currentTime) ? Math.max(0, currentTime) : 0
+  return INTRO_CAPTIONS.findLast(({ start }) => start <= safeTime) ?? INTRO_CAPTIONS[0]
+}
+
 /**
  * Film-stage DOM only. The corner lockup renders the brand mark, whose URL is
  * injected by the coordinator so this module never references the logo asset.
  */
 export function createVideoStage({ logoUrl = '' } = {}) {
+  const initialCaption = INTRO_CAPTIONS[0]
   const stage = document.createElement('section')
   stage.className = 'intro-film'
   stage.innerHTML = `
@@ -32,6 +45,33 @@ export function createVideoStage({ logoUrl = '' } = {}) {
       />
     </div>
 
+    <p
+      class="intro__caption"
+      data-intro-caption
+      data-caption-number="${initialCaption.number}"
+      aria-hidden="true"
+    >
+      <span class="intro__caption-inner">
+        <span class="intro__caption-number" data-intro-caption-number>${initialCaption.number}</span>
+        <span class="intro__caption-text" data-intro-caption-text>${initialCaption.text}</span>
+      </span>
+    </p>
+
   `
   return stage
+}
+
+export function updateIntroCaption(stage, currentTime) {
+  const caption = stage.querySelector('[data-intro-caption]')
+  if (!caption) return
+
+  const cue = captionAtTime(currentTime)
+  if (caption.dataset.captionNumber === cue.number) return
+
+  caption.dataset.captionNumber = cue.number
+  caption.querySelector('[data-intro-caption-number]').textContent = cue.number
+  caption.querySelector('[data-intro-caption-text]').textContent = cue.text
+  caption.classList.remove('is-changing')
+  void caption.offsetWidth
+  caption.classList.add('is-changing')
 }

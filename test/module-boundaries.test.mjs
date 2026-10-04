@@ -47,8 +47,14 @@ test('logo and film stages can be developed without importing each other', () =>
 test('the intro coordinator composes the independent logo and film stages', () => {
   const source = readFileSync(join(introRoot, 'index.js'), 'utf8')
 
-  assert.match(source, /import\s+\{\s*createLogoStage\s*\}\s+from\s+['"]\.\/logo-stage\.js['"]/)
-  assert.match(source, /import\s+\{\s*createVideoStage\s*\}\s+from\s+['"]\.\/video-stage\.js['"]/)
+  assert.match(
+    source,
+    /import\s+\{\s*createLogoStage\s*\}\s+from\s+['"]\.\/logo-stage\.js['"]/,
+  )
+  assert.match(
+    source,
+    /import\s+\{\s*(?:[$\w]+\s*,\s*)*createVideoStage(?:\s*,\s*[$\w]+)*\s*\}\s+from\s+['"]\.\/video-stage\.js['"]/,
+  )
 })
 
 test('legacy intro files are removed from the source root', () => {

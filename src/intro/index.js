@@ -1,6 +1,6 @@
 import './intro.css'
 import { createLogoStage } from './logo-stage.js'
-import { createVideoStage } from './video-stage.js'
+import { createVideoStage, updateIntroCaption } from './video-stage.js'
 import { PHASE, createIntroLoader, createPlaybackWatchdog } from './timeline.js'
 
 // Owned by the coordinator and injected into both stages, so neither the logo
@@ -16,10 +16,8 @@ export function playIntro({ revealTarget, onVideoBuffered = () => {} } = {}) {
   overlay.className = 'intro'
   overlay.dataset.phase = PHASE.IDLE
   overlay.dataset.videoReady = 'false'
-  overlay.append(
-    createVideoStage({ logoUrl: LOGO_ASSET_PATH }),
-    createLogoStage({ logoUrl: LOGO_ASSET_PATH }),
-  )
+  const videoStage = createVideoStage({ logoUrl: LOGO_ASSET_PATH })
+  overlay.append(videoStage, createLogoStage({ logoUrl: LOGO_ASSET_PATH }))
   document.body.append(overlay)
   const video = overlay.querySelector('.intro__video')
   let backgroundLoadReleased = false
@@ -85,6 +83,11 @@ export function playIntro({ revealTarget, onVideoBuffered = () => {} } = {}) {
     watchdog.markProgress()
   }
 
+  const onVideoTimeUpdate = () => {
+    watchdog.markProgress()
+    updateIntroCaption(videoStage, video.currentTime)
+  }
+
   const onKeyDown = (event) => {
     if (event.key === 'Escape') loader.skip()
   }
@@ -96,7 +99,7 @@ export function playIntro({ revealTarget, onVideoBuffered = () => {} } = {}) {
     video.removeEventListener('playing', onVideoPlaying)
     video.removeEventListener('canplaythrough', releaseBackgroundLoad)
     video.removeEventListener('progress', releaseWhenBuffered)
-    video.removeEventListener('timeupdate', watchdog.markProgress)
+    video.removeEventListener('timeupdate', onVideoTimeUpdate)
     watchdog.destroy()
     loader.destroy()
     video.pause()
@@ -112,7 +115,7 @@ export function playIntro({ revealTarget, onVideoBuffered = () => {} } = {}) {
   video.addEventListener('playing', onVideoPlaying)
   video.addEventListener('canplaythrough', releaseBackgroundLoad)
   video.addEventListener('progress', releaseWhenBuffered)
-  video.addEventListener('timeupdate', watchdog.markProgress)
+  video.addEventListener('timeupdate', onVideoTimeUpdate)
   window.addEventListener('keydown', onKeyDown)
 
   loader.done.then(() => {

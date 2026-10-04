@@ -241,6 +241,53 @@ test('plays the local film without controls and keeps the AirTriage lockup', asy
   await expect(intro).toHaveAttribute('data-phase', 'handoff', { timeout: 3000 })
 })
 
+test('changes one numbered caption beneath the intro film at mask transitions', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/')
+
+  const video = page.locator('.intro__video')
+  const caption = page.locator('[data-intro-caption]')
+  await expect(page.locator('.intro')).toHaveAttribute('data-phase', 'video', { timeout: 2500 })
+  await expect.poll(() => video.evaluate((element) => element.videoWidth)).toBeGreaterThan(0)
+  await expect(caption).toHaveCount(1)
+  await expect(page.locator('[data-intro-caption-number]')).toHaveCount(1)
+  await expect(page.locator('[data-intro-caption-text]')).toHaveCount(1)
+
+  const cues = [
+    { time: 0.1, number: '01', text: 'Lorem ipsum dolor sit amet.' },
+    { time: 4.999, number: '01', text: 'Lorem ipsum dolor sit amet.' },
+    { time: 5, number: '02', text: 'Consectetur adipiscing elit.' },
+    { time: 6.999, number: '02', text: 'Consectetur adipiscing elit.' },
+    { time: 7, number: '03', text: 'Sed do eiusmod tempor incididunt.' },
+    { time: 10.999, number: '03', text: 'Sed do eiusmod tempor incididunt.' },
+    { time: 11, number: '04', text: 'Ut labore et dolore magna aliqua.' },
+    { time: 7.1, number: '03', text: 'Sed do eiusmod tempor incididunt.' },
+    { time: 0.1, number: '01', text: 'Lorem ipsum dolor sit amet.' },
+    { time: 5.1, number: '02', text: 'Consectetur adipiscing elit.' },
+    { time: 11.1, number: '04', text: 'Ut labore et dolore magna aliqua.' },
+  ]
+
+  for (const cue of cues) {
+    await video.evaluate((element, time) => {
+      element.pause()
+      element.currentTime = time
+      element.dispatchEvent(new Event('timeupdate'))
+    }, cue.time)
+    await expect(caption.locator('[data-intro-caption-number]')).toHaveText(cue.number)
+    await expect(caption.locator('[data-intro-caption-text]')).toHaveText(cue.text)
+  }
+
+  const [captionBox, logoBox] = await Promise.all([
+    caption.boundingBox(),
+    page.locator('.intro__lockup-logo').boundingBox(),
+  ])
+  expect(captionBox).not.toBeNull()
+  expect(logoBox).not.toBeNull()
+  expect(captionBox.y).toBeGreaterThan(900 * 0.7)
+  expect(captionBox.width).toBeGreaterThanOrEqual(logoBox.width * 0.8)
+  expect(captionBox.width).toBeLessThanOrEqual(logoBox.width * 1.4)
+})
+
 test('hands off when the local film cannot play', async ({ page }) => {
   await page.route('**/video/RYSY_demo_20s_dopracowany.mp4', (route) => route.abort())
   await page.goto('/')

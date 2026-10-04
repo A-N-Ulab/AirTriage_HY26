@@ -15,8 +15,72 @@
   transition-duration: 0.6s;
 }
 
+.intro__caption {
+  position: absolute;
+  left: clamp(15rem, 22vw, 20rem);
+  bottom: clamp(0.875rem, 1.8vh, 1.25rem);
+  bottom: max(clamp(0.875rem, 1.8vh, 1.25rem), env(safe-area-inset-bottom));
+  z-index: 5;
+  width: clamp(190px, 18vw, 260px);
+  margin: 0;
+  color: var(--primary);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.intro__caption-inner {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.75rem;
+}
+
+.intro__caption-number {
+  padding-top: 0.25rem;
+  color: var(--secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+
+.intro__caption-text {
+  font-size: clamp(1.15rem, 1.55vw, 1.45rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.intro[data-phase='video'][data-video-ready='true'] .intro__caption {
+  opacity: 1;
+}
+
+.intro__caption.is-changing .intro__caption-inner {
+  animation: intro-caption-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes intro-caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .intro__caption {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .intro-film {
     transition-duration: 0.15s;
+  }
+
+  .intro__caption.is-changing .intro__caption-inner {
+    animation: none;
   }
 }
