@@ -43,19 +43,18 @@ export function createVideoStage({ logoUrl = '' } = {}) {
         width="1024"
         height="411"
       />
-    </div>
 
-    <p
-      class="intro__caption"
-      data-intro-caption
-      data-caption-number="${initialCaption.number}"
-      aria-hidden="true"
-    >
-      <span class="intro__caption-inner">
-        <span class="intro__caption-number" data-intro-caption-number>${initialCaption.number}</span>
-        <span class="intro__caption-text" data-intro-caption-text>${initialCaption.text}</span>
-      </span>
-    </p>
+      <p
+        class="intro__caption"
+        data-intro-caption
+        data-caption-number="${initialCaption.number}"
+      >
+        <span class="intro__caption-inner">
+          <span class="intro__caption-number" data-intro-caption-number>${initialCaption.number}</span>
+          <span class="intro__caption-text" data-intro-caption-text>${initialCaption.text}</span>
+        </span>
+      </p>
+    </div>
 
   `
   return stage

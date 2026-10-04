@@ -99,13 +99,14 @@
 
 .intro__lockup {
   position: absolute;
-  left: clamp(0.75rem, 1.5vw, 1.25rem);
+  left: clamp(1.5rem, 3vw, 2.75rem);
   bottom: clamp(0.875rem, 1.8vh, 1.25rem);
   bottom: max(clamp(0.875rem, 1.8vh, 1.25rem), env(safe-area-inset-bottom));
   z-index: 5;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(0.9rem, 1.7vw, 1.6rem);
   opacity: 0;
   transform: translateY(12px);
   transition:

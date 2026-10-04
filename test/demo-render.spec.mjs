@@ -277,15 +277,28 @@ test('changes one numbered caption beneath the intro film at mask transitions', 
     await expect(caption.locator('[data-intro-caption-text]')).toHaveText(cue.text)
   }
 
-  const [captionBox, logoBox] = await Promise.all([
+  const [captionBox, logoBox, captionMetrics] = await Promise.all([
     caption.boundingBox(),
     page.locator('.intro__lockup-logo').boundingBox(),
+    caption.evaluate((element) => {
+      const text = element.querySelector('[data-intro-caption-text]')
+      const range = document.createRange()
+      range.selectNodeContents(text)
+      return {
+        lines: range.getClientRects().length,
+        height: element.getBoundingClientRect().height,
+        lineHeight: parseFloat(getComputedStyle(text).lineHeight),
+      }
+    }),
   ])
   expect(captionBox).not.toBeNull()
   expect(logoBox).not.toBeNull()
   expect(captionBox.y).toBeGreaterThan(900 * 0.7)
-  expect(captionBox.width).toBeGreaterThanOrEqual(logoBox.width * 0.8)
-  expect(captionBox.width).toBeLessThanOrEqual(logoBox.width * 1.4)
+  // the cue sits beside the lockup, on a single line and inside the viewport
+  expect(captionBox.x).toBeGreaterThan(logoBox.x + logoBox.width)
+  expect(captionMetrics.lines).toBe(1)
+  expect(captionMetrics.height).toBeLessThanOrEqual(captionMetrics.lineHeight * 1.5)
+  expect(captionBox.x + captionBox.width).toBeLessThanOrEqual(1440)
 })
 
 test('hands off when the local film cannot play', async ({ page }) => {
