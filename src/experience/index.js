@@ -19,6 +19,7 @@ const pageMarkup = `
     <div class="experience-content">
       <section class="content-section content-section--examples" id="nasze-przyklady">
         <div class="section-heading">
+          <p class="section-heading__index" aria-hidden="true">01</p>
           <h1>Nasze przykłady</h1>
         </div>
 
@@ -55,6 +56,7 @@ const pageMarkup = `
 
       <section class="content-section content-section--contribution" id="nasz-wklad">
         <div class="section-heading">
+          <p class="section-heading__index" aria-hidden="true">02</p>
           <h2>Widok operatora</h2>
         </div>
 
@@ -108,6 +110,7 @@ const pageMarkup = `
         id="algorytm-i-podstawa-naukowa"
       >
         <div class="section-heading">
+          <p class="section-heading__index" aria-hidden="true">03</p>
           <h2>Algorytm</h2>
         </div>
 

@@ -176,10 +176,19 @@
 }
 
 .section-heading {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: minmax(32px, 0.14fr) 1fr;
+  align-items: start;
+  gap: clamp(0.75rem, 2vw, 2rem);
   width: min(100%, 72rem);
   margin: 0 auto clamp(2rem, 5vw, 4rem);
+}
+
+.section-heading__index {
+  margin: 0.5rem 0 0;
+  color: var(--secondary);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
 }
 
 .section-heading h1,
@@ -190,7 +199,6 @@
   font-weight: 500;
   line-height: 0.92;
   letter-spacing: -0.035em;
-  text-align: center;
   text-transform: uppercase;
 }
 
@@ -295,6 +303,10 @@
 
 .content-section--science .section-heading h2 {
   font-size: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.content-section--science .section-heading__index {
+  color: rgba(254, 242, 228, 0.6);
 }
 
 .science-content {
@@ -556,6 +568,7 @@
     aspect-ratio: 4 / 3;
   }
 
+  .section-heading,
   .example-grid,
   .contribution-body,
   .science-content {
@@ -624,6 +637,10 @@
     gap: 0.55rem;
     padding: 0.55rem 0.75rem;
     letter-spacing: 0.07em;
+  }
+
+  .section-heading {
+    grid-template-columns: 28px 1fr;
   }
 
   .section-heading h1,

@@ -35,8 +35,8 @@ src/experience/operator-scenario.json   # statyczne dane 4 osób dla każdej kla
 src/experience/operator-overlay.js      # synchronizacja panelu i oznaczeń SVG
 src/experience/operator-overlay.css     # panel A3 na desktopie i mobile
 tools/operator-tracking/                # offline tracking i budowa scenariusza
-public/video/RYSY_demo_20s_dopracowany.mp4 # film intro (1600×900, ok. 9,5 MiB)
-public/video/film_2.mp4                 # film interaktywny (720p, ok. 6,8 MiB)
+public/video/RYSY_demo_20s_dopracowany.mp4 # zoptymalizowany film intro (1080p, ok. 14,6 MiB)
+public/video/film_2.mp4                 # interaktywny film strony
 public/operator/*.webp                  # 4 poglądowe przybliżenia osób
 public/brand/airtriage-logo.svg         # produkcyjne logo
 public/CNAME                            # domena produkcyjna
@@ -76,11 +76,9 @@ semantyczny schemat HTML, progi HR/RR, ograniczenia POC oraz
 linki do czterech źródeł. Dwa filmy przykładów nie zostały jeszcze dostarczone,
 dlatego ich karty pokazują tekst alternatywny.
 
-Film intro ma rozdzielczość 1600×900 i 30 kl./s oraz jest zakodowany do
-webowego H.264 z metadanymi na początku pliku i bez nieużywanej ścieżki audio.
-Dzięki temu waży około 9,5 MiB zamiast pierwotnych 43,4 MiB. Film interaktywny
-ma rozdzielczość 1280×720 i waży około 6,8 MiB; zachowuje klatki kluczowe co
-200 ms potrzebne do responsywnego przewijania. Przejście logo → film
+Film intro zachowuje rozdzielczość 1920×1080 i 30 kl./s, ale jest zakodowany
+do webowego H.264 z metadanymi na początku pliku i bez nieużywanej ścieżki
+audio. Dzięki temu waży około 14,6 MiB zamiast 43,4 MiB. Przejście logo → film
 jest krótkim, 400-milisekundowym przenikaniem, uruchamianym dopiero po zdarzeniu
 `playing`, więc logo nie znika przed pierwszą gotową klatką na wolnym łączu.
 Główne bloki strony używają wspólnego, wycentrowanego kontenera o maksymalnej
