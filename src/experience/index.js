@@ -25,30 +25,56 @@ const pageMarkup = `
 
         <div class="example-grid">
           <article class="example-card">
-            <div
-              class="example-card__placeholder"
-              role="img"
-              aria-label="Miejsce na film przykładowy A"
-            >
-              <span>Film przykładowy zostanie dodany później</span>
+            <div class="example-card__frame">
+              <button
+                class="example-card__play"
+                type="button"
+                data-example-video="X_x6GHqZgeo"
+                data-video-title="AirTriage demo dron"
+                aria-label="Odtwórz film przykładowy A: AirTriage demo dron"
+              >
+                <img
+                  class="example-card__poster"
+                  src="https://i.ytimg.com/vi/X_x6GHqZgeo/maxresdefault.jpg"
+                  alt=""
+                  width="1280"
+                  height="720"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="example-card__play-badge">Odtwórz film</span>
+              </button>
             </div>
             <div class="example-card__copy">
               <p class="example-card__label">Przykład A</p>
-              <p>Tu będzie opis</p>
+              <p>AirTriage demo dron — Glinek</p>
             </div>
           </article>
 
           <article class="example-card">
-            <div
-              class="example-card__placeholder"
-              role="img"
-              aria-label="Miejsce na film przykładowy B"
-            >
-              <span>Film przykładowy zostanie dodany później</span>
+            <div class="example-card__frame">
+              <button
+                class="example-card__play"
+                type="button"
+                data-example-video="W03PTNARqvk"
+                data-video-title="AirTriage demo bpm"
+                aria-label="Odtwórz film przykładowy B: AirTriage demo bpm"
+              >
+                <img
+                  class="example-card__poster"
+                  src="https://i.ytimg.com/vi/W03PTNARqvk/maxresdefault.jpg"
+                  alt=""
+                  width="1280"
+                  height="720"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="example-card__play-badge">Odtwórz film</span>
+              </button>
             </div>
             <div class="example-card__copy">
               <p class="example-card__label">Przykład B</p>
-              <p>Tu będzie opis</p>
+              <p>AirTriage demo bpm — Glinek</p>
             </div>
           </article>
         </div>
@@ -276,6 +302,7 @@ export async function createExperience({
   const video = container.querySelector('[data-scrub-video]')
   const surface = container.querySelector('[data-scrub-surface]')
   const overlayMount = container.querySelector('[data-operator-overlay]')
+  const exampleGrid = container.querySelector('.example-grid')
   const scrubController = createScrubController({ video, surface })
   const scenario = await loadOperatorScenario()
   const operatorOverlay = createOperatorOverlay({
@@ -285,6 +312,29 @@ export async function createExperience({
     scenario,
   })
   let destroyed = false
+
+  /*
+   * The example cards ship as poster images only. YouTube's player costs about
+   * a megabyte of script per film, so it is requested on click and served from
+   * the privacy domain. The click is also the gesture autoplay requires.
+   */
+  const onExampleVideoClick = (event) => {
+    const button = event.target.closest('[data-example-video]')
+    if (!button) return
+
+    const embed = document.createElement('iframe')
+    embed.className = 'example-card__embed'
+    embed.src = `https://www.youtube-nocookie.com/embed/${button.dataset.exampleVideo}?autoplay=1&rel=0`
+    embed.title = button.dataset.videoTitle ?? 'Film przykładowy'
+    embed.allow =
+      'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+    embed.allowFullscreen = true
+    embed.referrerPolicy = 'strict-origin-when-cross-origin'
+    button.replaceWith(embed)
+    embed.focus()
+  }
+
+  exampleGrid?.addEventListener('click', onExampleVideoClick)
 
   const startVideoLoad = () => {
     if (destroyed || video.src) return
@@ -299,6 +349,7 @@ export async function createExperience({
   return {
     destroy() {
       destroyed = true
+      exampleGrid?.removeEventListener('click', onExampleVideoClick)
       operatorOverlay.destroy()
       scrubController.destroy()
       video.removeAttribute('src')

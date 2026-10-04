@@ -616,13 +616,33 @@ test('operator overlay shows image and scenario fallbacks without blocking the f
   await expect(page.locator('[data-scrub-video]')).toBeVisible()
 })
 
-test('shows text placeholders for example films that will be added later', async ({ page }) => {
+test('embeds the two example films on click instead of loading YouTube up front', async ({
+  page,
+}) => {
+  const youtubeRequests = []
+  page.on('request', (request) => {
+    if (/youtube\.com|youtube-nocookie\.com|googlevideo\.com/.test(request.url())) {
+      youtubeRequests.push(request.url())
+    }
+  })
   await skipIntro(page)
-  await expect(page.locator('#nasze-przyklady .example-card__placeholder')).toHaveCount(2)
-  await expect(page.locator('#nasze-przyklady .example-card__placeholder').first()).toContainText(
-    'Film przykładowy zostanie dodany później',
-  )
-  await expect(page.getByText('Tu będzie opis', { exact: true })).toHaveCount(2)
+
+  const section = page.locator('#nasze-przyklady')
+  await expect(section.locator('.example-card')).toHaveCount(2)
+  await expect(section.locator('.example-card__play')).toHaveCount(2)
+  await expect(section.locator('.example-card__poster')).toHaveCount(2)
+  await expect(section.locator('iframe')).toHaveCount(0)
+  // posters only: the player is not requested before a card is activated
+  expect(youtubeRequests).toHaveLength(0)
+
+  await section.locator('[data-example-video="W03PTNARqvk"]').click()
+
+  const embed = section.locator('iframe')
+  await expect(embed).toHaveCount(1)
+  await expect(embed).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/W03PTNARqvk\?autoplay=1/)
+  await expect(embed).toHaveAttribute('title', 'AirTriage demo bpm')
+  await expect(section.locator('.example-card__play')).toHaveCount(1)
+  await expect(section).toContainText('AirTriage demo bpm — Glinek')
 })
 
 test('keeps the page usable when the interactive film fails', async ({ page }) => {
