@@ -100,7 +100,8 @@
 .intro__lockup {
   position: absolute;
   left: clamp(0.75rem, 1.5vw, 1.25rem);
-  bottom: clamp(2.5rem, 7vh, 3.5rem);
+  bottom: clamp(0.875rem, 1.8vh, 1.25rem);
+  bottom: max(clamp(0.875rem, 1.8vh, 1.25rem), env(safe-area-inset-bottom));
   z-index: 5;
   display: flex;
   flex-direction: column;

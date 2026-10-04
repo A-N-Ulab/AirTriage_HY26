@@ -151,7 +151,41 @@ test('plays the local film without controls and keeps the AirTriage lockup', asy
     '/brand/airtriage-logo.svg',
   )
   const lockupBox = await page.locator('.intro__lockup').boundingBox()
+  expect(lockupBox.x).toBeGreaterThanOrEqual(12)
   expect(lockupBox.x).toBeLessThanOrEqual(24)
+  const viewport = page.viewportSize()
+  await expect
+    .poll(async () => {
+      const settledBox = await page.locator('.intro__lockup').boundingBox()
+      return viewport.height - (settledBox.y + settledBox.height)
+    })
+    .toBeGreaterThanOrEqual(12)
+  const settledBox = await page.locator('.intro__lockup').boundingBox()
+  const bottomGap = viewport.height - (settledBox.y + settledBox.height)
+  expect(bottomGap).toBeLessThanOrEqual(24)
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await expect
+    .poll(async () => {
+      const mobileBox = await page.locator('.intro__lockup').boundingBox()
+      return 844 - (mobileBox.y + mobileBox.height)
+    })
+    .toBeGreaterThanOrEqual(12)
+  const mobileBox = await page.locator('.intro__lockup').boundingBox()
+  const mobileBottomGap = 844 - (mobileBox.y + mobileBox.height)
+  const safeAreaBottom = await page.evaluate(() => {
+    const probe = document.createElement('div')
+    probe.style.paddingBottom = 'env(safe-area-inset-bottom)'
+    document.body.append(probe)
+    const inset = Number.parseFloat(getComputedStyle(probe).paddingBottom) || 0
+    probe.remove()
+    return inset
+  })
+  expect(mobileBox.x).toBeGreaterThanOrEqual(12)
+  expect(mobileBox.x).toBeLessThanOrEqual(24)
+  expect(mobileBox.x + mobileBox.width).toBeLessThanOrEqual(390)
+  expect(mobileBottomGap).toBeGreaterThanOrEqual(Math.max(12, safeAreaBottom - 0.5))
+  expect(mobileBottomGap).toBeLessThanOrEqual(Math.max(24, safeAreaBottom + 0.5))
 
   await video.evaluate((element) => {
     element.currentTime = Math.max(0, element.duration - 0.1)
