@@ -11,7 +11,7 @@
   opacity: 1;
   visibility: visible;
   transition:
-    opacity 0.3s ease,
+    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
     visibility 0s linear 0s;
 }
 
@@ -28,14 +28,14 @@
   object-fit: contain;
 }
 
-.intro[data-phase='video'] .intro-logo,
+.intro[data-phase='video'][data-video-ready='true'] .intro-logo,
 .intro[data-phase='handoff'] .intro-logo,
 .intro[data-phase='done'] .intro-logo {
   opacity: 0;
   visibility: hidden;
   transition:
-    opacity 0.3s ease,
-    visibility 0s linear 0.3s;
+    opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0.4s;
 }
 
 @media (prefers-reduced-motion: reduce) {

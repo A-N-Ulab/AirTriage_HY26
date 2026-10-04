@@ -2,10 +2,10 @@
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.intro[data-phase='video'] .intro-film {
+.intro[data-phase='video'][data-video-ready='true'] .intro-film {
   opacity: 1;
 }
 

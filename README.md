@@ -100,7 +100,8 @@ site at the domain root, and `public/CNAME` publishes it at:
 
 ## Assets and fonts
 
-- `public/video/RYSY_demo_20s_dopracowany.mp4` — intro film.
+- `public/video/RYSY_demo_20s_dopracowany.mp4` — fast-start 1080p intro film
+  optimised to about 14.6 MiB.
 - `public/video/film_2.mp4` — paused, drag-scrubbed page film.
 - `public/operator/*.webp` — four illustrative operator-panel close-ups.
 - `public/brand/airtriage-logo.svg` — production vector logo.

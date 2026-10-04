@@ -105,3 +105,19 @@ test('operator film is prepared for responsive browser seeking', async () => {
     `keyframes should be at most 250 ms apart; received ${metadata.maximumKeyframeGapSeconds.toFixed(3)} s`,
   )
 })
+
+test('intro film stays within the fast-start delivery budget', async () => {
+  const buffer = await readFile(
+    new URL('../public/video/RYSY_demo_20s_dopracowany.mp4', import.meta.url),
+  )
+  const boxes = readBoxes(buffer)
+  const moov = boxes.find((box) => box.type === 'moov' && box.path.length === 1)
+  const mdat = boxes.find((box) => box.type === 'mdat' && box.path.length === 1)
+
+  assert.ok(moov && mdat, 'intro MP4 should expose media and metadata boxes')
+  assert.ok(moov.start < mdat.start, 'intro metadata should precede media data')
+  assert.ok(
+    buffer.byteLength <= 15 * 1024 * 1024,
+    `intro film should be at most 15 MiB; received ${(buffer.byteLength / 1024 / 1024).toFixed(1)} MiB`,
+  )
+})

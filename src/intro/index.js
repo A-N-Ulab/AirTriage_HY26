@@ -15,6 +15,7 @@ export function playIntro({ revealTarget } = {}) {
   const overlay = document.createElement('div')
   overlay.className = 'intro'
   overlay.dataset.phase = PHASE.IDLE
+  overlay.dataset.videoReady = 'false'
   overlay.append(
     createVideoStage({ logoUrl: LOGO_ASSET_PATH }),
     createLogoStage({ logoUrl: LOGO_ASSET_PATH }),
@@ -48,6 +49,11 @@ export function playIntro({ revealTarget } = {}) {
     loader.completeVideo()
   }
 
+  const onVideoPlaying = () => {
+    overlay.dataset.videoReady = 'true'
+    watchdog.markProgress()
+  }
+
   const onKeyDown = (event) => {
     if (event.key === 'Escape') loader.skip()
   }
@@ -56,7 +62,7 @@ export function playIntro({ revealTarget } = {}) {
     window.removeEventListener('keydown', onKeyDown)
     video.removeEventListener('ended', onVideoFinished)
     video.removeEventListener('error', onVideoFinished)
-    video.removeEventListener('playing', watchdog.markProgress)
+    video.removeEventListener('playing', onVideoPlaying)
     video.removeEventListener('timeupdate', watchdog.markProgress)
     watchdog.destroy()
     loader.destroy()
@@ -70,7 +76,7 @@ export function playIntro({ revealTarget } = {}) {
 
   video.addEventListener('ended', onVideoFinished)
   video.addEventListener('error', onVideoFinished)
-  video.addEventListener('playing', watchdog.markProgress)
+  video.addEventListener('playing', onVideoPlaying)
   video.addEventListener('timeupdate', watchdog.markProgress)
   window.addEventListener('keydown', onKeyDown)
 

@@ -22,7 +22,7 @@
   inset: 0;
   overflow: hidden;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .intro__drift {
@@ -62,19 +62,19 @@
   inset: 0;
   z-index: 3;
   opacity: 0;
-  transition: opacity 0.6s ease;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   background:
     linear-gradient(
       to top,
-      var(--bg-a96) 0%,
-      rgba(254, 242, 228, 0.74) 16%,
-      rgba(254, 242, 228, 0.24) 40%,
-      rgba(254, 242, 228, 0) 62%
+      rgba(254, 242, 228, 0.92) 0%,
+      rgba(254, 242, 228, 0.64) 12%,
+      rgba(254, 242, 228, 0.18) 30%,
+      rgba(254, 242, 228, 0) 48%
     ),
     radial-gradient(
-      120% 78% at 50% 44%,
-      rgba(254, 242, 228, 0) 46%,
-      rgba(254, 242, 228, 0.5) 100%
+      130% 54% at 50% 84%,
+      rgba(254, 242, 228, 0) 45%,
+      rgba(254, 242, 228, 0.3) 100%
     );
 }
 
@@ -99,7 +99,7 @@
 
 .intro__lockup {
   position: absolute;
-  left: clamp(1.25rem, 4vw, 3rem);
+  left: clamp(0.75rem, 1.5vw, 1.25rem);
   bottom: clamp(2.5rem, 7vh, 3.5rem);
   z-index: 5;
   display: flex;
@@ -121,19 +121,19 @@
 
 /* ------------------------------------------------------- phase states -- */
 
-.intro[data-phase='video'] .intro__media {
+.intro[data-phase='video'][data-video-ready='true'] .intro__media {
   opacity: 1;
 }
 
-.intro[data-phase='video'] .intro__drift {
+.intro[data-phase='video'][data-video-ready='true'] .intro__drift {
   animation-play-state: running;
 }
 
-.intro[data-phase='video'] .intro__scrim {
+.intro[data-phase='video'][data-video-ready='true'] .intro__scrim {
   opacity: 1;
 }
 
-.intro[data-phase='video'] .intro__lockup {
+.intro[data-phase='video'][data-video-ready='true'] .intro__lockup {
   opacity: 1;
   transform: none;
 }

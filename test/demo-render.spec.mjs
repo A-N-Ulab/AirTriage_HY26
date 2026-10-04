@@ -43,9 +43,35 @@ test('shows the standalone logo stage on the page background before crossfading 
     await page
       .locator('.intro__media')
       .evaluate((element) => getComputedStyle(element).transitionDuration),
-  ).toBe('0.3s')
+  ).toBe('0.4s')
 
   await expect(intro).toHaveAttribute('data-phase', 'video', { timeout: 2500 })
+  await expect(logo).toBeHidden()
+})
+
+test('keeps the logo visible until a delayed intro film actually starts playing', async ({ page }) => {
+  let releaseVideo
+  const videoReleased = new Promise((resolve) => {
+    releaseVideo = resolve
+  })
+
+  await page.route('**/video/RYSY_demo_20s_dopracowany.mp4', async (route) => {
+    await videoReleased
+    await route.continue()
+  })
+  await page.goto('/')
+
+  const intro = page.locator('.intro')
+  const logo = page.locator('.intro-logo__image')
+  await expect(intro).toHaveAttribute('data-phase', 'video', { timeout: 2500 })
+  await expect(intro).toHaveAttribute('data-video-ready', 'false')
+  await expect(logo).toBeVisible()
+  expect(
+    await page.locator('.intro__media').evaluate((element) => getComputedStyle(element).opacity),
+  ).toBe('0')
+
+  releaseVideo()
+  await expect(intro).toHaveAttribute('data-video-ready', 'true', { timeout: 5000 })
   await expect(logo).toBeHidden()
 })
 
@@ -124,6 +150,8 @@ test('plays the local film without controls and keeps the AirTriage lockup', asy
     'src',
     '/brand/airtriage-logo.svg',
   )
+  const lockupBox = await page.locator('.intro__lockup').boundingBox()
+  expect(lockupBox.x).toBeLessThanOrEqual(24)
 
   await video.evaluate((element) => {
     element.currentTime = Math.max(0, element.duration - 0.1)
