@@ -196,8 +196,13 @@
   display: grid;
   gap: 0.1rem;
   padding: 0.38rem;
+  border: 1px solid transparent;
   border-radius: 0.48rem;
   background: rgba(255, 250, 242, 0.1);
+}
+
+.operator-card__metrics > .operator-card__metric--warning {
+  border-color: #ffd23f;
 }
 
 .operator-card__metrics small {

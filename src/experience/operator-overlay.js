@@ -40,7 +40,7 @@ const personCardMarkup = (person) => `
     <span class="operator-card__details">
       <span class="operator-card__condition">${escapeHtml(person.condition)}</span>
       <span class="operator-card__metrics">
-        <span><small>HR</small><strong>${person.heartRate}/min</strong></span>
+        <span class="${person.status === 'yellow' ? 'operator-card__metric--warning' : ''}"><small>HR</small><strong>${person.heartRate}/min</strong></span>
         <span><small>RR</small><strong>${person.respiratoryRate}/min</strong></span>
       </span>
       <span class="operator-card__visibility" data-person-visibility="${escapeHtml(person.id)}"></span>

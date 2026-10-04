@@ -96,8 +96,10 @@ const pageMarkup = `
           <div class="contribution-caption">
             <p class="contribution-caption__label">Interaktywny podgląd</p>
             <p>
-              Przeciągnij obraz w poziomie, aby prześledzić nagranie klatka po klatce
-              z perspektywy operatora dronu.
+              Widok prezentuje cztery wybrane osoby, aby czytelnie pokazać mechanizm
+              oznaczania, wyboru i rozwijania danych w panelu operatora. Kolory zgodne są
+              z założeniami triażu i pokazują ostrzeżenia w przypadku sprawdzonych
+              parametrów. Podstawy naukowe znajdują się w zakładce Algorytmy.
             </p>
             <p class="contribution-caption__disclaimer">
               Widok celowo prezentuje cztery wybrane osoby z większej grupy, aby czytelnie
